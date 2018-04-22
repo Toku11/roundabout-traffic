@@ -7,6 +7,6 @@ class Roundabout{
   
   void draw(){
     fill(0,255,0);
-    ellipse(width/2, height/2, size/3,size/3);
+    ellipse(0, 0, size/3,size/3);
   }
 }

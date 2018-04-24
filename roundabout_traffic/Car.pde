@@ -3,22 +3,30 @@ class Car {
   PVector position;
   color col;
   int w, h;
+  float rotation,scale;
+  Vec2D center;
 
   Car(String image, PVector position, int w, int h) {
     this.position = position;
     carrito = loadImage(image);
+    imageMode(CENTER);
     this.w=w;
     this.h=h;
   }
 
   public void draw() {
+    /* rotate and applyMatrix works fine but with applMatrix you can Scale and move the center*/
+    float alpha=this.scale*cos(this.rotation);
+    float beta=this.scale*sin(this.rotation);
     tint(col);
     pushMatrix();
-    translate(this.position.x, this.position.y);
-    rotate(PI/2);
-    imageMode(CENTER);
-    image(carrito, position.x, position.y, w, h);
+    translate(this.position.x,this.position.y);
+    //rotate(-this.rotation); 
+    applyMatrix(alpha,beta,(1-alpha)*this.center.x-beta*this.center.y
+    ,-beta, alpha, this.center.x+(1-alpha)*this.center.y);
+    image(carrito, 0, 0, w, h);     
     popMatrix();
+      
   }
 
   public void setColor(color col) {
@@ -27,8 +35,13 @@ class Car {
 
   public void setPosition(PVector v) {
     this.position = v;
-  }
 
+  }
+  public void setRotation(Vec2D center, float angle, float scale){
+    this.center = center;
+    this.scale = scale;
+    this.rotation = angle;
+  }
   public float distance2Center() {
     float x=this.position.x; 
     float y=this.position.y;
@@ -37,13 +50,14 @@ class Car {
   }
   public int sensor(Car car, PVector vector) {
     Vec2D k=distance2Car(car);
-    if (k.a >= PI/4 && k.a <= 3*PI/4 && k.d < vector.y) {
+    //x:distance,y:angle
+    if (k.y >= PI/4 && k.y <= 3*PI/4 && k.x < vector.y) {
       return 1;
-    } else if (abs(k.a) > 3*PI/4 && k.d < vector.x) {  
+    } else if (abs(k.y) > 3*PI/4 && k.x < vector.x) {  
       return 2;
-    } else if (abs(k.a) < PI/4 && k.d < vector.x) {  
+    } else if (abs(k.y) < PI/4 && k.x < vector.x) {  
       return 3;
-    } else if (k.a <= -PI/4 && k.a >= -3*PI/4 && k.d < vector.y) {  
+    } else if (k.y <= -PI/4 && k.y >= -3*PI/4 && k.x < vector.y) {  
       return 4;
     } else {
       return 0;

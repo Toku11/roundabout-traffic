@@ -1,8 +1,9 @@
   public class Vec2D {
-    float d, a;
+    float y, x;
 
-    Vec2D(float d, float a) {
-      this.a = a;
-      this.d=d;
+    Vec2D(float x, float y) {
+      this.x = x;
+      this.y=y;
     }
   }
+ 

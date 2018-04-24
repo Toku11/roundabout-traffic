@@ -5,15 +5,15 @@ ArrayList<Car> cars;
 
 void setup() {
   size(800, 600);
-  frameRate = 100;
+  frameRate = 1;
   roundabout = new Roundabout(500, 2);
 
-  tesla = new Car("red.png", new PVector(0, 0), 30, 60);
+  tesla = new Car("red.png", new PVector(0, 0),10);
   tesla.setColor(color(100));
-  
+
   cars = new ArrayList();
-  cars.add(new Car("red.png", new PVector(0, 0), 30, 60));
-  cars.add(new Car("red.png", new PVector(100, 100), 30, 60));
+  cars.add(new Car("red.png", new PVector(0, 0),10));
+  cars.add(new Car("red.png", new PVector(100, 100),50));
   cars.get(0).setColor(color(180));
 }
 
@@ -25,14 +25,16 @@ void draw() {
   roundabout.draw();
   
   tesla.setRotation(new Vec2D(0,0),0, 1.0);
-  tesla.draw();
+
 
   if (i<=360) i=i+1;
   else i=0;
   
   for (Car car : cars) {
-      car.setPosition(i);//new PVector(mouseX-width/2, mouseY-height/2));
-      car.setRotation(new Vec2D(0,0),car.distanceToCenter().y, 1.0);
+      car.setPosition();//new PVector(mouseX-width/2, mouseY-height/2));
+      car.setRotation(new Vec2D(0,0),car.distanceToCenter().y, 0.1);
+      tesla.setRotation(new Vec2D(0,0),tesla.distanceToCenter().y, 0.1);
+      tesla.draw();
       car.draw();
     
   }

@@ -1,18 +1,19 @@
 class Car {
   PImage carrito;
-  PVector position, position_ini;
+  PVector position, initialPosition;
   color col;
-  int w, h;
+  int time=0,lastTime=0;
+  int i=0,vel;
   float rotation,scale;
   Vec2D center;
 
-  Car(String image, PVector position, int w, int h) {
+  Car(String image, PVector position, int vel) {
     this.position = position;
-    this.position_ini = position;
+    this.initialPosition = position;
+    this.vel = vel;
     carrito = loadImage(image);
     imageMode(CENTER);
-    this.w=w;
-    this.h=h;
+
   }
 
   public void draw() {
@@ -25,7 +26,7 @@ class Car {
     //rotate(-this.rotation); 
     applyMatrix(alpha,beta,(1-alpha)*this.center.x-beta*this.center.y
     ,-beta, alpha, this.center.x+(1-alpha)*this.center.y);
-    image(carrito, 0, 0, w, h);     
+    image(carrito, 0, 0);     
     popMatrix();
       
   }
@@ -34,9 +35,10 @@ class Car {
     this.col=col;
   }
 
-  public void setPosition(float v) {
-    float x=(100+this.position_ini.x)*cos(radians(i));
-    float y=(100+this.position_ini.y)*sin(radians(i));
+  public void setPosition() {
+    velocity();
+    float x=(100+this.initialPosition.x)*cos(radians(this.i));
+    float y=(100+this.initialPosition.y)*sin(radians(this.i));
     this.position = new PVector(x,-y);
 
   }
@@ -57,17 +59,11 @@ class Car {
   public int sensor(Car car, PVector vector) {
     Vec2D k=distanceToCar(car);
     //x:distance,y:angle
-    if (k.y >= PI/4 && k.y <= 3*PI/4 && k.x < vector.y) {
-      return 1;
-    } else if (abs(k.y) > 3*PI/4 && k.x < vector.x) {  
-      return 2;
-    } else if (abs(k.y) < PI/4 && k.x < vector.x) {  
-      return 3;
-    } else if (k.y <= -PI/4 && k.y >= -3*PI/4 && k.x < vector.y) {  
-      return 4;
-    } else {
-      return 0;
-    }
+    if (k.y >= PI/4 && k.y <= 3*PI/4 && k.x < vector.y) return 1;
+    else if (abs(k.y) > 3*PI/4 && k.x < vector.x) return 2;
+    else if (abs(k.y) < PI/4 && k.x < vector.x) return 3;
+    else if (k.y <= -PI/4 && k.y >= -3*PI/4 && k.x < vector.y) return 4;
+    else return 0;
   }
 
   public Vec2D distanceToCar(Car car) {
@@ -79,5 +75,13 @@ class Car {
     float dis = sqrt(pow(posex-x, 2)+pow(posey-y, 2));
     float ang = atan2(-y+posey, x-posex);
     return new Vec2D(dis, ang);
+  }
+  public void velocity(){
+    this.time= millis()-this.lastTime;
+    if (this.time>this.vel){
+      this.lastTime=millis();
+      if(i<360) this.i=this.i+1;
+      else this.i=0;
+    }
   }
 }

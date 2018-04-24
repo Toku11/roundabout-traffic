@@ -1,6 +1,6 @@
 class Car {
   PImage carrito;
-  PVector position;
+  PVector position, position_ini;
   color col;
   int w, h;
   float rotation,scale;
@@ -8,6 +8,7 @@ class Car {
 
   Car(String image, PVector position, int w, int h) {
     this.position = position;
+    this.position_ini = position;
     carrito = loadImage(image);
     imageMode(CENTER);
     this.w=w;
@@ -33,23 +34,28 @@ class Car {
     this.col=col;
   }
 
-  public void setPosition(PVector v) {
-    this.position = v;
+  public void setPosition(float v) {
+    float x=(100+this.position_ini.x)*cos(radians(i));
+    float y=(100+this.position_ini.y)*sin(radians(i));
+    this.position = new PVector(x,-y);
 
   }
+  
   public void setRotation(Vec2D center, float angle, float scale){
     this.center = center;
     this.scale = scale;
     this.rotation = angle;
   }
-  public float distance2Center() {
+  public Vec2D distanceToCenter() {
     float x=this.position.x; 
     float y=this.position.y;
     float d2center=sqrt(pow(x, 2)+pow(y, 2));
-    return d2center;
+    float ang = atan2(-y, x);
+    return new Vec2D (d2center,ang);
   }
+  
   public int sensor(Car car, PVector vector) {
-    Vec2D k=distance2Car(car);
+    Vec2D k=distanceToCar(car);
     //x:distance,y:angle
     if (k.y >= PI/4 && k.y <= 3*PI/4 && k.x < vector.y) {
       return 1;
@@ -64,7 +70,7 @@ class Car {
     }
   }
 
-  public Vec2D distance2Car(Car car) {
+  public Vec2D distanceToCar(Car car) {
 
     float x=car.position.x;
     float y=car.position.y;

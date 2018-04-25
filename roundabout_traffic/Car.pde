@@ -3,21 +3,21 @@ class Car {
   PVector position, initialPosition;
   color col;
   int time=0,lastTime=0;
-  int i=0,vel;
+  int i=0,speed;
   float rotation,scale;
   Vec2D center;
 
-  Car(String image, PVector position, int vel) {
+  Car(String image, PVector position, int speed) {
     this.position = position;
     this.initialPosition = position;
-    this.vel = vel;
+    this.speed = speed;
     carrito = loadImage(image);
     imageMode(CENTER);
 
   }
 
   public void draw() {
-    /* rotate and applyMatrix works fine but with applMatrix you can Scale and move the center*/
+    //rotate and applyMatrix works fine but with applMatrix you can Scale and move the center
     float alpha=this.scale*cos(this.rotation);
     float beta=this.scale*sin(this.rotation);
     tint(col);
@@ -78,7 +78,7 @@ class Car {
   }
   public void velocity(){
     this.time= millis()-this.lastTime;
-    if (this.time>this.vel){
+    if (this.time>this.speed){
       this.lastTime=millis();
       if(i<360) this.i=this.i+1;
       else this.i=0;

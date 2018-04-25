@@ -13,7 +13,7 @@ void setup() {
 
   cars = new ArrayList();
   cars.add(new Car("red.png", new PVector(0, 0),10));
-  cars.add(new Car("red.png", new PVector(100, 100),50));
+  cars.add(new Car("red.png", new PVector(0, 0),50));
   cars.get(0).setColor(color(180));
 }
 

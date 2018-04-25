@@ -8,6 +8,7 @@ class Roundabout{
   void draw(){
    //fill(128,128,0);
     noFill();
-    ellipse(0, 0, size/3,size/3);
+    arc(0, 0, 300,300,0,TWO_PI);
+    arc(0, 0, 710,710,0,TWO_PI);
   }
 }

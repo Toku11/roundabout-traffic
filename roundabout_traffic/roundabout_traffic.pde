@@ -16,13 +16,13 @@ int i=0;
 
 
 void setup() {
-  size(800, 600);
-  frameRate(200);
+  size(1000, 1000);
+  frameRate(1000);
   offset = new PVector(width/2, height/2);
 
   roundabout = new Roundabout(500, 2);
 
-  tesla = new Car("red.png", new PVector(0, 0), 10);
+  tesla = new Car("red.png", new PVector(0, 0), 0);
   tesla.setColor(color(100));
 
   cars = new ArrayList();
@@ -45,8 +45,8 @@ void draw() {
 
   for (Car car : cars) {
     car.setPosition();//new PVector(mouseX-width/2, mouseY-height/2));
-    car.setRotation(new Vec2D(0, 0), car.distanceToCenter().y, 0.1);
-    tesla.setRotation(new Vec2D(0, 0), tesla.distanceToCenter().y, 0.1);
+    car.setRotation(new Vec2D(0, 0), car.distanceToCenter().y, 0.08);
+    tesla.setRotation(new Vec2D(0, 0), tesla.distanceToCenter().y, 0.08);
     tesla.draw();
     car.draw();
   }
@@ -86,7 +86,7 @@ void sliderCars(int value) {
 void addRandomCars(int n) {
   cars.clear();
   for (int j=0; j<n; j++) {
-    Car c = new Car("red.png", new PVector(j*50, j*50), (int)random(10, 50));
+    Car c = new Car("red.png", new PVector(165+j*30, 165+j*30), (int)random(10, 50));
     c.setColor((int)random(0, 255));
     cars.add(c);
   }

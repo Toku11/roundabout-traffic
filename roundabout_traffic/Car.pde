@@ -1,15 +1,15 @@
 class Car {
   PImage carrito;
-  PVector position, initialPosition;
+  PVector position, ratio;
   color col;
   int time=0,lastTime=0;
   int i=0,speed;
-  float rotation,scale;
+  float rotation,scale,dis,v;
   Vec2D center;
 
   Car(String image, PVector position, int speed) {
     this.position = position;
-    this.initialPosition = position;
+    this.ratio = position;
     this.speed = speed;
     carrito = loadImage(image);
     imageMode(CENTER);
@@ -36,9 +36,10 @@ class Car {
   }
 
   public void setPosition() {
-    velocity();
-    float x=(100+this.initialPosition.x)*cos(radians(this.i));
-    float y=(100+this.initialPosition.y)*sin(radians(this.i));
+    randomMove();
+    float x=(this.ratio.x)*cos(radians(this.i));
+    float y=(this.ratio.y)*sin(radians(this.i));
+    
     this.position = new PVector(x,-y);
 
   }
@@ -48,6 +49,7 @@ class Car {
     this.scale = scale;
     this.rotation = angle;
   }
+  
   public Vec2D distanceToCenter() {
     float x=this.position.x; 
     float y=this.position.y;
@@ -72,16 +74,26 @@ class Car {
     float y=car.position.y;
     float posex=this.position.x;
     float posey=this.position.y;
-    float dis = sqrt(pow(posex-x, 2)+pow(posey-y, 2));
+    this.dis = sqrt(pow(posex-x, 2)+pow(posey-y, 2));
     float ang = atan2(-y+posey, x-posex);
-    return new Vec2D(dis, ang);
+    return new Vec2D(this.dis, ang);
   }
-  public void velocity(){
+  
+  public void randomMove(){ 
+    //TODO: cambiar funciones de velocidad a m/s y no dependiente de frame rate
+    //porque se atrasan los carritos, insertar modelo cinemático de los vehículos
+    //hacer integral con condiciones iniciales
+    
     this.time= millis()-this.lastTime;
-    if (this.time>this.speed){
+    if (this.time>=10/*this.speed*/){
       this.lastTime=millis();
-      if(i<360) this.i=this.i+1;
+      if(i<360){ this.i=this.i+1;
+      float w=1.0/this.time*180/PI;
+      this.v=this.ratio.x/this.time;
+     // println("angular" + w, "lineal"+ v);
+      }
       else this.i=0;
     }
+    
   }
 }

@@ -17,7 +17,7 @@ int i=0;
 
 void setup() {
   size(1000, 1000);
-  frameRate(1000);
+  frameRate(200);
   offset = new PVector(width/2, height/2);
 
   roundabout = new Roundabout(500, 2);
@@ -37,12 +37,12 @@ void setup() {
 void draw() {
 
   background(128);
-
+  
   pushMatrix();
-  translate(offset.x, offset.y);
-
+  //translate(offset.x, offset.y);
+  applyMatrix(1,0,offset.x,
+              0, 1,offset.y); 
   roundabout.draw();
-
   for (Car car : cars) {
     car.setPosition();//new PVector(mouseX-width/2, mouseY-height/2));
     car.setRotation(new Vec2D(0, 0), car.distanceToCenter().y, 0.08);
@@ -50,8 +50,8 @@ void draw() {
     tesla.draw();
     car.draw();
   }
-
   popMatrix();
+
 
   info.draw(showInfo);
   text("Framerate: "+frameRate, 10, height-10);
@@ -86,7 +86,7 @@ void sliderCars(int value) {
 void addRandomCars(int n) {
   cars.clear();
   for (int j=0; j<n; j++) {
-    Car c = new Car("red.png", new PVector(165+j*30, 165+j*30), (int)random(10, 50));
+    Car c = new Car("red.png", new PVector(30*j+160, 30*j+160), (float)random(0.5, 1));
     c.setColor((int)random(0, 255));
     cars.add(c);
   }

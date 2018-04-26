@@ -1,32 +1,33 @@
 class Car {
-  PImage carrito;
-  PVector position, ratio;
+  PImage carImage;
+  PVector position, radius;
   color col;
+  boolean init=false;
   int time=0,lastTime=0;
-  int i=0,speed;
-  float rotation,scale,dis,v;
+  int i=0;
+  float angle,scale,xx=0,yy=0,psi=0,speed,ms;
   Vec2D center;
 
-  Car(String image, PVector position, int speed) {
+  Car(String image, PVector position, float speed) {
     this.position = position;
-    this.ratio = position;
+    this.radius = position;
     this.speed = speed;
-    carrito = loadImage(image);
+    carImage = loadImage(image);
     imageMode(CENTER);
 
   }
 
   public void draw() {
     //rotate and applyMatrix works fine but with applMatrix you can Scale and move the center
-    float alpha=this.scale*cos(this.rotation);
-    float beta=this.scale*sin(this.rotation);
+    float alpha=this.scale*cos(this.angle+PI/2);
+    float beta=this.scale*sin(this.angle+PI/2);
     tint(col);
     pushMatrix();
-    translate(this.position.x,this.position.y);
-    //rotate(-this.rotation); 
+    translate(this.xx,-this.yy);
+    //rotate(-this.angle); 
     applyMatrix(alpha,beta,(1-alpha)*this.center.x-beta*this.center.y
     ,-beta, alpha, this.center.x+(1-alpha)*this.center.y);
-    image(carrito, 0, 0);     
+    image(carImage, 0, 0);     
     popMatrix();
       
   }
@@ -37,35 +38,32 @@ class Car {
 
   public void setPosition() {
     randomMove();
-    float x=(this.ratio.x)*cos(radians(this.i));
-    float y=(this.ratio.y)*sin(radians(this.i));
-    
-    this.position = new PVector(x,-y);
+    float x = this.radius.x*cos(this.psi);//float(this.time)/1000;
+    float y = this.radius.y*sin(this.psi);//*float(this.time)/1000;
+    this.xx=x;
+    this.yy=y;
+        // println("angular" + w, "lineal"+ v);
+        //}
+    //float x=(this.ratio.x)*cos(radians(this.i));
+    //float y=(this.ratio.y)*sin(radians(this.i));
+    //point(this.xx,this.yy);
+    this.position = new PVector(x,y);
 
   }
   
   public void setRotation(Vec2D center, float angle, float scale){
     this.center = center;
     this.scale = scale;
-    this.rotation = angle;
+    this.angle = angle;
+    //println("Angulo"+angle*180/PI);
   }
   
   public Vec2D distanceToCenter() {
     float x=this.position.x; 
     float y=this.position.y;
     float d2center=sqrt(pow(x, 2)+pow(y, 2));
-    float ang = atan2(-y, x);
+    float ang = atan2(y, x);
     return new Vec2D (d2center,ang);
-  }
-  
-  public int sensor(Car car, PVector vector) {
-    Vec2D k=distanceToCar(car);
-    //x:distance,y:angle
-    if (k.y >= PI/4 && k.y <= 3*PI/4 && k.x < vector.y) return 1;
-    else if (abs(k.y) > 3*PI/4 && k.x < vector.x) return 2;
-    else if (abs(k.y) < PI/4 && k.x < vector.x) return 3;
-    else if (k.y <= -PI/4 && k.y >= -3*PI/4 && k.x < vector.y) return 4;
-    else return 0;
   }
 
   public Vec2D distanceToCar(Car car) {
@@ -74,26 +72,45 @@ class Car {
     float y=car.position.y;
     float posex=this.position.x;
     float posey=this.position.y;
-    this.dis = sqrt(pow(posex-x, 2)+pow(posey-y, 2));
-    float ang = atan2(-y+posey, x-posex);
-    return new Vec2D(this.dis, ang);
+    float dis = sqrt(pow(posex-x, 2)+pow(posey-y, 2));
+    float ang = atan2(y-posey, x-posex);
+    return new Vec2D(dis, ang);
   }
   
   public void randomMove(){ 
-    //TODO: cambiar funciones de velocidad a m/s y no dependiente de frame rate
-    //porque se atrasan los carritos, insertar modelo cinemático de los vehículos
-    //hacer integral con condiciones iniciales
-    
-    this.time= millis()-this.lastTime;
-    if (this.time>=10/*this.speed*/){
+    if (this.init==false){
+      this.init=true;
       this.lastTime=millis();
-      if(i<360){ this.i=this.i+1;
-      float w=1.0/this.time*180/PI;
-      this.v=this.ratio.x/this.time;
-     // println("angular" + w, "lineal"+ v);
-      }
-      else this.i=0;
     }
-    
+    else
+    {
+        this.time= millis()-this.lastTime;
+        if (this.time>=10){
+        this.lastTime=millis();
+        float v =201;//radians(this.speed)*(this.radius.x/(float(this.time)/1000.0));
+        this.ms=v;
+        float delta_psi_dot = v*tan(radians(0.1))/50;
+        this.psi += delta_psi_dot;
+        if (this.psi>PI)
+          this.psi=this.psi-6.28;
+        else if (this.psi<-3.14)
+          this.psi=this.psi+6.28;
+        //println("velocidad"+v, "Angulo"+this.psi*180/PI);
+      }
+    }
+  }
+   public void control(){
+   
+   
+   }
+  
+    public int sensor(Car car, PVector vector) {
+    Vec2D k=distanceToCar(car);
+    //x:distance,y:angle
+    if (k.y >= PI/4 && k.y <= 3*PI/4 && k.x < vector.y) return 1;
+    else if (abs(k.y) > 3*PI/4 && k.x < vector.x) return 2;
+    else if (abs(k.y) < PI/4 && k.x < vector.x) return 3;
+    else if (k.y <= -PI/4 && k.y >= -3*PI/4 && k.x < vector.y) return 4;
+    else return 0;
   }
 }

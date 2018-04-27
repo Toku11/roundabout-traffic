@@ -3,7 +3,7 @@ class Car {
   PImage carImage;
   PVector position, radius;
   color col;
-  int time, lastTime=0, psi=0, timeLap;
+  int time,time2, lastTime=0,lastTime2=0, psi=0, timeLap;
   float angle, scale, speed;
   Vec2D center;
 
@@ -16,8 +16,8 @@ class Car {
   }
 
   public void draw() {
-    float alpha=this.scale*cos(this.angle+PI/2);
-    float beta=this.scale*sin(this.angle+PI/2);
+    float alpha=this.scale*cos(this.angle+HALF_PI);
+    float beta=this.scale*sin(this.angle+HALF_PI);
     tint(col);
     pushMatrix();
     translate(this.position.x, -this.position.y);
@@ -33,8 +33,8 @@ class Car {
 
   public void setPosition() {
     vehicleMove();
-    float x = /*this.speed*/this.radius.x*cos(radians(this.psi))/*this.time*/;
-    float y = /*this.speed*/this.radius.y*sin(radians(this.psi));
+    float x = this.radius.x*cos(radians(this.psi))/*this.speed*//*this.time*/;
+    float y = this.radius.y*sin(radians(this.psi));
     
     /*this.xx+=x
     this.yy=x*/
@@ -77,7 +77,29 @@ class Car {
 
       if (this.psi<360) this.psi=this.psi+1;
       else this.psi=0;
+    }
       
+      this.time2= millis()-this.lastTime2;
+      if (this.time2>=3000) {
+      this.lastTime2=millis();
+      float actionProbability = random(1);
+      
+      if (actionProbability<=0.2 && this.timeLap>=3){//decrease speed
+      this.timeLap = this.timeLap - 3;
+      }
+      else if (actionProbability>0.2 && actionProbability<=0.4){//speed up
+      this.timeLap = this.timeLap + 3;
+      }
+      else if (actionProbability>0.4 && actionProbability<=0.6 && this.radius.x<280){//left lane change
+      this.radius.x=this.radius.x+ 30;
+      this.radius.y=this.radius.y+ 30;
+      }
+      else if (actionProbability>0.6 && actionProbability<=0.8 && this.radius.x>160){//right lane change
+      this.radius.x=this.radius.x- 30;
+      this.radius.y=this.radius.y- 30;
+      }
+      else{//keep
+      }}
       /*====== Drive the vehicle with front steering===========*/
       //float delta_psi_dot = this.speed*tan(radians(25))/48.8;
       /*this.psi += delta_psi_dot;
@@ -87,7 +109,7 @@ class Car {
        this.psi=this.psi+6.28;*/
       //println("velocidad"+v, "Angulo"+this.psi*180/PI);
       /*=========================================================*/
-    }
+
   }
 
   public int sensor(Car car, PVector vector) {

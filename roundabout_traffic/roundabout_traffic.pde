@@ -39,9 +39,7 @@ void draw() {
   background(128);
   
   pushMatrix();
-  //translate(offset.x, offset.y);
-  applyMatrix(1,0,offset.x,
-              0, 1,offset.y); 
+  translate(offset.x, offset.y); 
   roundabout.draw();
   for (Car car : cars) {
     car.setPosition();//new PVector(mouseX-width/2, mouseY-height/2));
@@ -86,7 +84,7 @@ void sliderCars(int value) {
 void addRandomCars(int n) {
   cars.clear();
   for (int j=0; j<n; j++) {
-    Car c = new Car("red.png", new PVector(30*j+160, 30*j+160), (float)random(0.5, 1));
+    Car c = new Car("red.png", new PVector(30*j+160, 30*j+160), (int)random(10, 20));
     c.setColor((int)random(0, 255));
     cars.add(c);
   }

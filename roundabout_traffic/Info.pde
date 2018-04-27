@@ -21,7 +21,7 @@ class Info {
       Vec2D vec = testCar.distanceToCar(car);
       printText("Distance: " + vec.x);
       printText("Angle: " + vec.y*180/PI +"°");
-      printText("Speed: " + car.ms);
+      printText("Speed: " + car.speed);
       printText("In range from sensor: " + testCar.sensor(car, new PVector(300, 300) ));
     }
   }

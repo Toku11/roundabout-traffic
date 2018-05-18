@@ -16,20 +16,19 @@ boolean onlySimulation;
 
 void setup() {
   size(1000, 1000);
-  frameRate(200);
+  frameRate(500);
   offset = new PVector(width/2, height/2);
 
-  roundabout = new Roundabout(500);
+  roundabout = new Roundabout();
 
   tesla = new Car("red.png", new PVector(0, 0), 0, numLanes);
   tesla.setColor(color(100));
-
   cars = new ArrayList();
-
   info = new Info(new PVector(10, 20), tesla, cars);
-
+  
   initGUI();
-
+  
+  //surface.setVisible(false);
 }
 
 void draw() {
@@ -40,16 +39,15 @@ void draw() {
   
   translate(offset.x, offset.y); 
   roundabout.draw();    
-  tesla.setRotation(new Vec2D(0, 0), tesla.distanceToCenter().y, 0.08);
+  tesla.setPosition();
   tesla.draw();
+  
   for (Car car : cars) {
-    car.setPosition();//new PVector(mouseX-width/2, mouseY-height/2));
-    car.setRotation(new Vec2D(0, 0), car.distanceToCenter().y, 0.08);
+    car.setPosition();
     car.draw();
   }
   
   popMatrix();
-
 
   info.draw(showInfo);
   text("Framerate: "+frameRate, 10, height-10);
@@ -57,15 +55,7 @@ void draw() {
 
 void initGUI() {
   cp5 = new ControlP5(this);
-
-  cp5.addSlider("sliderCars")
-    .setPosition(10, height-60)
-    .setWidth(100)
-    .setRange(1, 5)
-    .setValue(5)
-    .setNumberOfTickMarks(5)
-    .setSliderMode(Slider.FLEXIBLE);
-    
+ 
   cp5.addSlider("sliderLanes")
     .setPosition(180, height-60)
     .setWidth(100)
@@ -73,6 +63,15 @@ void initGUI() {
     .setValue(5)
     .setNumberOfTickMarks(5)
     .setSliderMode(Slider.FLEXIBLE);
+    
+  cp5.addSlider("sliderCars")
+    .setPosition(10, height-60)
+    .setWidth(100)
+    .setRange(1, 5)
+    .setValue(2)
+    .setNumberOfTickMarks(5)
+    .setSliderMode(Slider.FLEXIBLE);
+    
 
   cp5.addToggle("showInfo")
     .setPosition(10, height-100)
@@ -92,7 +91,7 @@ void sliderCars(int value) {
 void addRandomCars(int n) {
   cars.clear();
   for (int j=0; j<n; j++) {
-    Car c = new Car("red.png",lane(), (int)random(10, 20), numLanes);
+    Car c = new Car("red.png",setLane(), (int)random(10, 20), numLanes);
     c.setColor((int)random(0, 255));
     cars.add(c);
   }
@@ -100,11 +99,12 @@ void addRandomCars(int n) {
   
 void sliderLanes(int value){
   numLanes = value;
+  tesla.lanes=value*30;
   sliderCars(value);
   roundabout.setLanes(value);
   }
   
-PVector lane(){
+PVector setLane(){
   int a = (int)random(0,numLanes);
   return new PVector(30*a+160,30*a+160);
 }

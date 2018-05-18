@@ -2,6 +2,7 @@ class Info {
   PVector position;
   Car testCar;
   ArrayList<Car> aiCars;
+  
   int line, spacing = 14;
 
   Info(PVector position, Car car, ArrayList<Car> cars) {
@@ -18,7 +19,7 @@ class Info {
 
     for (Car car : cars) {
       line++;
-      Vec2D vec = testCar.distanceToCar(car);
+      PVector vec = testCar.distanceToCar(car);
       printText("Distance: " + vec.x);
       printText("Angle: " + vec.y*180/PI +"°");
       printText("Speed: " + car.speed);

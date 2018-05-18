@@ -1,8 +1,7 @@
 class Roundabout{
-  int size, lanes;
-  float lastI=PI/12;;
-  Roundabout(int size){
-    this.size = size;
+  int lanes;
+  float lastI=PI/12;
+  Roundabout(){
   }
   
   void draw(){

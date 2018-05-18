@@ -4,9 +4,8 @@ PImage carImage;
   PVector position, radius;
   color col;
   int time,time2, lastTime=0,lastTime2=0, psi=0, timeLap, lanes;
-  float angle, scale, speed;
-  Vec2D center;
-  Sensor sensor = new Sensor(25);
+  float angle, speed;
+  utils utils = new utils();
 
   Car(String image, PVector position, int timeLap/*ms*/, int lanes) {
     this.position = position;
@@ -14,19 +13,18 @@ PImage carImage;
     this.timeLap = timeLap;
     this.lanes = lanes*30;
     carImage = loadImage(image);
+    carImage.resize(50,21);
     imageMode(CENTER);
   }
 
   public void draw() {
-    float alpha=this.scale*cos(this.angle+HALF_PI);
-    float beta=this.scale*sin(this.angle+HALF_PI);
     tint(col);
     pushMatrix();
     translate(this.position.x, -this.position.y);
-    applyMatrix(alpha, beta, (1-alpha)*this.center.x-beta*this.center.y
-      , -beta, alpha, this.center.x+(1-alpha)*this.center.y);
+    rotate(-distanceToCenter().y-HALF_PI);
     image(carImage, 0, 0);     
     popMatrix();
+    /*println(carImage.width, carImage.height);*/
   }
 
   public void setColor(color col) {
@@ -40,21 +38,16 @@ PImage carImage;
     this.position = new PVector(x, y);
   }
 
-  public void setRotation(Vec2D center, float angle, float scale) {
-    this.center = center;
-    this.angle = angle;
-    this.scale = scale;
-  }
 
-  public Vec2D distanceToCenter() {
+  public PVector distanceToCenter() {
     float x=this.position.x; 
     float y=this.position.y;
     float d2center=sqrt(pow(x, 2)+pow(y, 2));
-    float ang = atan2(y, x);
-    return new Vec2D (d2center, ang);
+    this.angle = atan2(y, x);
+    return new PVector (d2center, this.angle);
   }
 
-  public Vec2D distanceToCar(Car car) {
+  public PVector distanceToCar(Car car) {
 
     float x=car.position.x;
     float y=car.position.y;
@@ -62,7 +55,7 @@ PImage carImage;
     float posey=this.position.y;
     float dis = sqrt(pow(posex-x, 2)+pow(posey-y, 2));
     float ang = atan2(y-posey, x-posex);
-    return new Vec2D(dis, ang);
+    return new PVector(dis, ang);
   }
 
   public void vehicleMove() { 
@@ -72,7 +65,6 @@ PImage carImage;
     if (this.time >= this.timeLap) {
       this.lastTime = millis();
       this.speed = radians(1)*(this.radius.x/(this.time/1000.0))/10;//10*m/s
-
       if (this.psi < 360) this.psi=this.psi+1;
       else this.psi = 0;
     }
@@ -85,31 +77,45 @@ PImage carImage;
   }
   
   public void randomMove(){
-  float actionProbability = random(1);
+  float actionProbability = random(0,1);
 
-      if (actionProbability<=0.2 && !sensor.nonMin(this.timeLap)){//decrease speed
+      if (utils.inRange(actionProbability,0.001,0.20) && !utils.nonMin(this.timeLap)){//speed up
       this.timeLap = this.timeLap - 1;
       }
-      else if (sensor.inRange(actionProbability, 0.2,0.4) && sensor.nonMax(this.timeLap)){//speed up
-      this.timeLap = this.timeLap + 1;
+      else if (utils.inRange(actionProbability, 0.2,0.45) && utils.nonMax(this.timeLap)){//decrease speed
+      this.timeLap = this.timeLap + 5;
       }
-      else if (sensor.inRange(actionProbability, 0.4,0.6) && this.radius.x<130+lanes){//left lane change
-      this.radius.x = this.radius.x + 30;
-      this.radius.y = this.radius.y + 30;
+      else if (utils.inRange(actionProbability, 0.45,0.65) && this.radius.x<130+this.lanes){//right lane chan
+        laneChange('r');
       }
-      else if (sensor.inRange(actionProbability, 0.6,0.8) && this.radius.x>160){//right lane change
-      this.radius.x = this.radius.x - 30;
-      this.radius.y = this.radius.y - 30;
+      else if (utils.inRange(actionProbability, 0.65,0.85) && this.radius.x>160){//left lane change
+        laneChange('l');
+
       }
       else{//keep
       }
   }
   
-
+  public void laneChange(char side){
+   switch (side){
+      case 'r':
+         this.radius.x = this.radius.x+30;
+         this.radius.y = this.radius.y+30; 
+         break;
+      case 'l':
+         this.radius.x = this.radius.x-30;
+         this.radius.y = this.radius.y-30;
+         break;
+      default:
+         break;
+   }
+    
+  }
+    
   
   
   public int sensor(Car car, PVector vector) {
-    Vec2D k=distanceToCar(car);
+    PVector k=distanceToCar(car);
     //x:distance,y:angle
     if (k.y >= PI/4 && k.y <= 3*PI/4 && k.x < vector.y) return 1;
     else if (abs(k.y) > 3*PI/4 && k.x < vector.x) return 2;

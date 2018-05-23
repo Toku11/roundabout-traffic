@@ -21,8 +21,9 @@ void setup() {
 
   roundabout = new Roundabout();
 
-  tesla = new Car("red.png", new PVector(0, 0), 0, numLanes);
+  tesla = new Car("red.png", new PVector(0, 0), 10, numLanes);
   tesla.setColor(color(100));
+
   cars = new ArrayList();
   info = new Info(new PVector(10, 20), tesla, cars);
   
@@ -41,12 +42,13 @@ void draw() {
   roundabout.draw();    
   tesla.setPosition();
   tesla.draw();
+  println(tesla.time2);
+  //tesla.makeSensor();
   
   for (Car car : cars) {
     car.setPosition();
     car.draw();
   }
-  
   popMatrix();
 
   info.draw(showInfo);

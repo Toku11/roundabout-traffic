@@ -4,13 +4,13 @@
     utils() {   
     }
     
-    public boolean nonMax(int vel){
-    if (vel<=40)  return true;
+    public boolean nonMax(float vel){
+    if (vel<=40.0)  return true;
     else  return false;
     }
     
-    public boolean nonMin(int vel){
-    if (vel<=10) return true;
+    public boolean nonMin(float vel){
+    if (vel<=10.0) return true;
     else return false;
     }
   

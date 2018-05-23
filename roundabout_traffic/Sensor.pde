@@ -1,12 +1,13 @@
 class Sensor {
   private int range;
-  Car tesla;
+  Car teslas;
   ArrayList<Car> cars;
+  PVector position;
   
 Sensor(PVector position, Car car, ArrayList<Car> cars) {
     this.position = position;
-    this.testCar = car;
-    this.aiCars = cars;
+    this.teslas = car;
+    this.cars = cars;
   }
 
   void setRange(int range) {

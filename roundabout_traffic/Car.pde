@@ -3,8 +3,9 @@ class Car {
 PImage carImage;
   PVector position, radius;
   color col;
-  int lastTime=0,lastTime2=0, psi=0, lanes, time, time2;
-  float angle, speed, timeLap;
+  int lastTime=0,lastTime2=0, psi=0, lanes, time, time2, countEffect=0;
+  float angle, speed, timeLap,actionProbability ;
+  boolean change = false;
   utils utils = new utils();
 
   Car(String image, PVector position, int timeLap/*ms*/, int lanes) {
@@ -21,7 +22,7 @@ PImage carImage;
     tint(col);
     pushMatrix();
     translate(this.position.x, -this.position.y);
-    rotate(distanceToCenter().y-HALF_PI);
+    rotate(distanceToCenter().y);
     image(carImage, 0, 0);     
     popMatrix();
     /*println(carImage.width, carImage.height);*/
@@ -38,36 +39,16 @@ PImage carImage;
     this.position = new PVector(x, y);
   }
 
-
-  public PVector distanceToCenter() {
-    float x=this.position.x; 
-    float y=this.position.y;
-    float d2center=sqrt(pow(x, 2)+pow(y, 2));
-    float angle = atan2(-y, x);
-    return new PVector (d2center, angle);
-  }
-
-  public PVector distanceToCar(Car car) {
-
-    float x=car.position.x;
-    float y=car.position.y;
-    float posex=this.position.x;
-    float posey=this.position.y;
-    float dis = sqrt(pow(posex-x, 2)+pow(posey-y, 2));
-    float ang = atan2(y-posey, x-posex);
-    return new PVector(dis, ang);
-  }
-
   public void vehicleMove() { 
     speedStimation();
     this.time = millis()-this.lastTime2;    
-    if (this.time >= 3000) {
+    if (this.time >= 3000 || isChanging()) {
       this.lastTime2 = millis();
-      randomMove();
+      movement();
       }
-
-  }
-  public void speedStimation(){
+  } 
+  
+    public void speedStimation(){
       this.time2 = millis()-this.lastTime;
       if (this.time2 >= this.timeLap) {
         this.lastTime = millis();
@@ -76,11 +57,13 @@ PImage carImage;
       else this.psi = 0;
     }
   }
-  
-  
-  public void randomMove(){
-  float actionProbability = random(0,1);
-
+    
+  public void movement(){
+    
+      if (!isChanging()) {
+          actionProbability = random(0,1);
+      }
+      
       if (utils.inRange(actionProbability,0.001,0.20) && !utils.nonMin(this.timeLap)){//speed up
           speedUp();
       }
@@ -97,7 +80,7 @@ PImage carImage;
       else{//keep
       }
   }
-  
+      
   public void speedUp(){
     this.timeLap = this.timeLap - 1;
   }
@@ -107,28 +90,65 @@ PImage carImage;
   }
   
   public void keepLastSpeed(){
-    if (this.speed>0)
+    if (this.speed>10)
     this.timeLap = ((this.radius.x*radians(1)) / (this.speed*10))*1000.0;
   }
   
   public void laneChange(char side){
    switch (side){
       case 'r':
-         this.radius.x = this.radius.x+30;
-         this.radius.y = this.radius.y+30; 
+         this.radius.x = this.radius.x+laneEffect();
+         this.radius.y = this.radius.y+laneEffect(); 
          keepLastSpeed();
          break;
       case 'l':
-         this.radius.x = this.radius.x-30;
-         this.radius.y = this.radius.y-30;
+         this.radius.x = this.radius.x-laneEffect();
+         this.radius.y = this.radius.y-laneEffect();
          keepLastSpeed();         
          break;
       default:
          break;
-   }
-    
+   }    
   }
+
+ public boolean isChanging(){
+      return this.change;
+  }
+ 
+ public int laneEffect(){
+   if (this.countEffect>=30){
+     this.countEffect=0;
+     this.change=false;
+     return 0;
+   }
+   else{
+     this.countEffect++;
+     this.change = true;
+     return 1;
+   }
+ }
     
+  public PVector distanceToCenter() {
+    float x=this.position.x; 
+    float y=this.position.y;
+    float d2center=sqrt(pow(x, 2)+pow(y, 2));
+    float angle = atan2(-y, x)-HALF_PI;
+    return new PVector (d2center, angle);
+  }
+
+  public PVector distanceToCar(Car car) {
+
+    float x=car.position.x;
+    float y=car.position.y;
+    float posex=this.position.x;
+    float posey=this.position.y;
+    float dis = sqrt(pow(posex-x, 2)+pow(posey-y, 2));
+    float ang = atan2(y-posey, x-posex);
+    return new PVector(dis, ang);
+  }
+
+
+
   public void makeSensor(){
     int spread = 20;
     ArrayList<PVector> points= new ArrayList<PVector>();
@@ -137,6 +157,10 @@ PImage carImage;
     }
   }
   
+  public void setRoutes(){
+    
+    
+  }
   /*public void getSensorDistance(ArrayList<PVector> points){
     int i=0;
     for (PVector point:points){

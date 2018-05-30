@@ -21,8 +21,8 @@ void setup() {
 
   roundabout = new Roundabout();
 
-  tesla = new Car("red.png", new PVector(0, 0), 10, numLanes);
-  tesla.setColor(color(100));
+  tesla = new Car("red.png", setLane()/*new PVector(0, 0)*/, 10, numLanes);
+  //tesla.setColor(color(100));
 
   cars = new ArrayList();
   info = new Info(new PVector(10, 20), tesla, cars);
@@ -42,9 +42,6 @@ void draw() {
   roundabout.draw();    
   tesla.setPosition();
   tesla.draw();
-  println(tesla.time2);
-  //tesla.makeSensor();
-  
   for (Car car : cars) {
     car.setPosition();
     car.draw();
@@ -101,7 +98,7 @@ void addRandomCars(int n) {
   
 void sliderLanes(int value){
   numLanes = value;
-  tesla.lanes=value*30;
+  tesla.lanes = value*30;
   sliderCars(value);
   roundabout.setLanes(value);
   }

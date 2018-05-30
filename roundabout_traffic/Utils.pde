@@ -5,7 +5,7 @@
     }
     
     public boolean nonMax(float vel){
-    if (vel<=40.0)  return true;
+    if (vel<=20.0)  return true;
     else  return false;
     }
     

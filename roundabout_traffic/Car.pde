@@ -149,19 +149,20 @@ PImage carImage;
   }
 
   public void getSensorReadings(){
+    int numSensors = 8;
     ArrayList<PVector> arm = makeSensor();
-    for(int i=-0; i<=360;i=i+45){
+    for(int i=-0; i<=360;i=i+360/numSensors){
       getSensorDistance(arm,radians(i));
     }
-    // Hay que modificar aqui para que sean mas brazos, verificar el offset porque no lo vi
-    // para todos los puntos en sensor distance
+
   }
 
   public ArrayList makeSensor(){
     int spread = 3;
+    int armLength = 7;
     ArrayList<PVector> points= new ArrayList<PVector>();
 
-    for(int i=1;i<=7;i++){
+    for(int i=1;i<=armLength;i++){
       points.add(new PVector(26+(spread*i),0));
     }
     return points;

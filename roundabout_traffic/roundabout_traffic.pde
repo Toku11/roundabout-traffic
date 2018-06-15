@@ -17,12 +17,14 @@ boolean onlySimulation;
 void setup() {
   size(1000, 1000);
   frameRate(500);
+  colorMode(RGB,255);
+  stroke(255,255,255);
   offset = new PVector(width/2, height/2);
 
   roundabout = new Roundabout();
 
-  tesla = new Car("red.png", setLane()/*new PVector(0, 0)*/, 10, numLanes);
-  //tesla.setColor(color(100));
+  tesla = new Car("red.png", setLane(), 10, numLanes);
+  tesla.setColor(color(#FA400D));
 
   cars = new ArrayList();
   info = new Info(new PVector(10, 20), tesla, cars);
@@ -34,22 +36,29 @@ void setup() {
 
 void draw() {
 
-  background(128);
+  background(0);
   
   pushMatrix();
   
   translate(offset.x, offset.y); 
-  roundabout.draw();    
+  setEnvironment();
+  for (Car car : cars) {
+    car.getSensorReadings();
+  }
+  tesla.getSensorReadings(); 
+  popMatrix();
+  info.draw(showInfo);
+  text("Framerate: "+frameRate, 10, height-10);
+}
+
+void setEnvironment(){
+roundabout.draw();    
   tesla.setPosition();
   tesla.draw();
   for (Car car : cars) {
     car.setPosition();
     car.draw();
   }
-  popMatrix();
-
-  info.draw(showInfo);
-  text("Framerate: "+frameRate, 10, height-10);
 }
 
 void initGUI() {
@@ -91,7 +100,7 @@ void addRandomCars(int n) {
   cars.clear();
   for (int j=0; j<n; j++) {
     Car c = new Car("red.png",setLane(), (int)random(10, 20), numLanes);
-    c.setColor((int)random(0, 255));
+    c.setColor(color(#D638E8));//(int)random(100, 255));
     cars.add(c);
   }
 }
@@ -105,5 +114,5 @@ void sliderLanes(int value){
   
 PVector setLane(){
   int a = (int)random(0,numLanes);
-  return new PVector(30*a+160,30*a+160);
+  return new PVector(30*a+165,30*a+165);
 }

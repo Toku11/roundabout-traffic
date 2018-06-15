@@ -6,6 +6,7 @@ class Roundabout{
   
   void draw(){
     noFill();
+    //stroke(255);
     for (int j=0;j<=this.lanes;j++){
       for (int i=0; i<24;i=i+2){
         if (j==0&& i==22) arc(0, 0, 300,300,0,TWO_PI);

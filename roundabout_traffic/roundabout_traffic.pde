@@ -3,11 +3,12 @@ import controlP5.*;
 ControlP5 cp5;
 Roundabout roundabout;
 Info info;
+Sensor sensor;
+Car tesla;
 
 PVector offset;
-
 ArrayList<Car> cars;
-Car tesla;
+
 int numLanes;
 boolean showInfo;
 boolean onlySimulation;
@@ -15,20 +16,18 @@ boolean onlySimulation;
 
 
 void setup() {
+  
   size(1000, 1000);
   frameRate(500);
   colorMode(RGB,255);
   stroke(255,255,255);
   offset = new PVector(width/2, height/2);
-
   roundabout = new Roundabout();
-
   tesla = new Car("red.png", setLane(), 10, numLanes);
   tesla.setColor(color(#FA400D));
-
   cars = new ArrayList();
   info = new Info(new PVector(10, 20), tesla, cars);
-  
+  sensor  = new Sensor(tesla,cars);
   initGUI();
   
   //surface.setVisible(false);
@@ -38,27 +37,33 @@ void draw() {
 
   background(0);
   
-  pushMatrix();
-  
-  translate(offset.x, offset.y); 
+  pushMatrix();  
+  translate(offset.x, offset.y);
   setEnvironment();
+  
   for (Car car : cars) {
-    car.getSensorReadings();
+    car.getSensorReadings(8);
   }
-  tesla.getSensorReadings(); 
+    tesla.getSensorReadings(8); 
+
   popMatrix();
+  
+  
   info.draw(showInfo);
   text("Framerate: "+frameRate, 10, height-10);
 }
 
 void setEnvironment(){
-roundabout.draw();    
+  roundabout.draw();    
   tesla.setPosition();
   tesla.draw();
   for (Car car : cars) {
     car.setPosition();
     car.draw();
   }
+
+
+  
 }
 
 void initGUI() {
@@ -75,8 +80,8 @@ void initGUI() {
   cp5.addSlider("sliderCars")
     .setPosition(10, height-60)
     .setWidth(100)
-    .setRange(1, 5)
-    .setValue(2)
+    .setRange(1, 10)
+    .setValue(10)
     .setNumberOfTickMarks(5)
     .setSliderMode(Slider.FLEXIBLE);
     
@@ -97,12 +102,15 @@ void sliderCars(int value) {
 }
 
 void addRandomCars(int n) {
+  
   cars.clear();
+  
   for (int j=0; j<n; j++) {
     Car c = new Car("red.png",setLane(), (int)random(10, 20), numLanes);
     c.setColor(color(#D638E8));//(int)random(100, 255));
     cars.add(c);
   }
+  
 }
   
 void sliderLanes(int value){

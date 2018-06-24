@@ -5,7 +5,7 @@ class Car {
   color col;
   int lastTime = 0, lastTime2 = 0, psi = 0, lanes, time, time2, countEffect = 0;
   float angle, speed, timeLap, actionProbability = 0, radius ;
-  boolean change = false;
+  boolean change = false, yes=true;
   boolean showSensor =false;
   utils utils = new utils();
   
@@ -25,7 +25,9 @@ class Car {
     tint(col);
     pushMatrix();
     translate(this.position.x, -this.position.y);
+    if(yes==true)
     rotate(distanceToCenter().y);
+    else rotate(-HALF_PI);
     image(carImage, 0, 0);     
     popMatrix();
     /*println(carImage.width, carImage.height);*/
@@ -162,7 +164,7 @@ class Car {
     ArrayList<PVector> arm = makeSensor();
     ArrayList<PVector> range = new ArrayList<PVector>();
     
-    for(int i = -0; i < 360;i = i + 360 / numSensors){
+    for(int i = 0; i < 360;i = i + 360 / numSensors){
       int distance = getSensorDistance(arm,radians(i));
       range.add(new PVector(distance, i));      
     }
@@ -171,7 +173,7 @@ class Car {
   }
 
   public ArrayList makeSensor(){  
-    int spread = 3;
+    int spread = 2;
     int armLength = 7;
     ArrayList<PVector> points = new ArrayList<PVector>();
 

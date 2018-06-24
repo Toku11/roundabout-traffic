@@ -35,7 +35,7 @@
       for(PVector sensor:sensors){
         if(sensor.x < 7.0 && side=='r'&& inRange(sensor.y,45,135)) {return true;}
         if(sensor.x < 7.0 && side=='l'&& inRange(sensor.y,225,315)){return true;}
-        if(sensor.x < 7.0 && side=='f'&& sensor.y==0){println("f"); return true;}
+        if(sensor.x < 7.0 && side=='f'&& sensor.y==0){return true;}
       }
       return false;
     }

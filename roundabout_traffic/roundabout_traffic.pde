@@ -23,8 +23,8 @@ void setup() {
   stroke(255,255,255);
   offset = new PVector(width/2, height/2);
   roundabout = new Roundabout();
-  tesla = new Car("red.png", setLane(), 10, numLanes);
-  tesla.setColor(color(#FA400D));
+  tesla = new Car("red.png", setLane()/*new PVector(80,-300)*/ , 10, numLanes);
+  tesla.setColor(color(#E8351A));
   cars = new ArrayList();
   info = new Info(new PVector(10, 20), tesla, cars);
   sensor  = new Sensor(tesla,cars);
@@ -56,6 +56,7 @@ void draw() {
 void setEnvironment(){
   roundabout.draw();    
   tesla.setPosition();
+  tesla.showSensor=true;
   tesla.draw();
   for (Car car : cars) {
     car.setPosition();
@@ -107,7 +108,7 @@ void addRandomCars(int n) {
   
   for (int j=0; j<n; j++) {
     Car c = new Car("red.png",setLane(), (int)random(10, 20), numLanes);
-    c.setColor(color(#D638E8));//(int)random(100, 255));
+    c.setColor(color(#BDFCED));//(int)random(100, 255));
     cars.add(c);
   }
   

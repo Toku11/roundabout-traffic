@@ -44,8 +44,8 @@ void draw() {
   for (Car car : cars) {
     car.getSensorReadings(8);
   }
-    tesla.getSensorReadings(8); 
-
+    tesla.getSensorReadings(36); 
+    //println(tesla.isChanging(), ' ' ,tesla.actionProbability,',' ,tesla.countEffect,' ',tesla.casemove,' ',tesla.radius);
   popMatrix();
   
   

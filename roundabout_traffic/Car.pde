@@ -6,7 +6,7 @@ class Car {
   int lastTime = 0, lastTime2 = 0, psi = 0, lanes, time, time2, countEffect = 0;
   float angle, speed, timeLap, actionProbability = 0, radius ;
   boolean change = false, yes=true;
-  boolean showSensor =false;
+  boolean showSensor = false;
   utils utils = new utils();
   
   ArrayList<PVector> sensorRange = new ArrayList(7);
@@ -50,9 +50,12 @@ class Car {
   public void vehicleMove() { 
     speedStimation();
     this.time = millis() - this.lastTime2;    
+    
     if (utils.isBlocked(this.sensorRange,'f')){speedDown();}
+    
     else if(utils.isVelMin(this.timeLap)){this.timeLap = random(10,20);}
-    if (this.time >= 3000 || isChanging()) {
+    
+    if (this.time >= 1000 || isChanging()) {
       this.lastTime2 = millis();
       movement();
       }
@@ -77,17 +80,20 @@ class Car {
           actionProbability = random(0,1);
       }
       
-      if (utils.inRange(actionProbability,0.001,0.20) && !utils.isVelMax(this.timeLap) && utils.isBlocked(this.sensorRange,'f')){//speed up
+      if(isChanging()&&(this.radius==165||this.radius==135+this.lanes)) laneEffect();
+      
+      if (utils.inRange(actionProbability,0.001,.3) && !utils.isVelMax(this.timeLap)){//speed up
           speedUp();
       }
-      else if (utils.inRange(actionProbability, 0.2,0.45) && !utils.isVelMin(this.timeLap)){//decrease speed
+      else if (utils.inRange(actionProbability, 0.3,0.4) && !utils.isVelMin(this.timeLap)){//decrease speed
           speedDown();
       }
-      else if (utils.inRange(actionProbability, 0.45,0.65) && this.radius < 135 + this.lanes && !utils.isBlocked(this.sensorRange,'r')){//right lane chan
+      else if (utils.inRange(actionProbability, 0.4,0.7) && this.radius < 135 + this.lanes && (!utils.isBlocked(this.sensorRange,'r')||isChanging())){//right lane chan
         laneChange('r');
       }
-      else if (utils.inRange(actionProbability, 0.65,0.85) && this.radius > 165 && !utils.isBlocked(this.sensorRange,'l')){//left lane change
+      else if (utils.inRange(actionProbability, 0.7,0.99) && this.radius >165 && (!utils.isBlocked(this.sensorRange,'l')||isChanging())){//left lane change
         laneChange('l');
+        
 
       }
       else{//keep
@@ -99,7 +105,7 @@ class Car {
   }
   
   public void speedDown(){
-    this.timeLap = this.timeLap + 1;
+    this.timeLap = this.timeLap + 2;
   }
   
   public void keepLastSpeed(){
@@ -117,7 +123,7 @@ class Car {
       
       case 'l':
          this.radius = this.radius - laneEffect();
-         keepLastSpeed();         
+         keepLastSpeed(); 
          break;
       
       default:
@@ -160,16 +166,15 @@ class Car {
     return new PVector(dis, ang);
   }
 
-  public ArrayList<PVector> getSensorReadings(int numSensors){ 
+  public void getSensorReadings(int numSensors){ 
     ArrayList<PVector> arm = makeSensor();
     ArrayList<PVector> range = new ArrayList<PVector>();
     
-    for(int i = 0; i < 360;i = i + 360 / numSensors){
+    for(int i = 0; i < 360; i = i + 360 / numSensors){
       int distance = getSensorDistance(arm,radians(i));
       range.add(new PVector(distance, i));      
     }
     this.sensorRange = range;
-    return sensorRange;
   }
 
   public ArrayList makeSensor(){  
@@ -188,7 +193,7 @@ class Car {
    
     for (PVector point:points){
       i++;
-      PVector rotatedPoint=getRotatedPoint(point, offset);
+      PVector rotatedPoint = getRotatedPoint(point, offset);
       
       if(utils.isOut(rotatedPoint)) return i;
       else{ if (utils.isRed(rotatedPoint)) return i;}

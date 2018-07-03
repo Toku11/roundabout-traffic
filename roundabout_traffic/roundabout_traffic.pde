@@ -25,6 +25,7 @@ void setup() {
   roundabout = new Roundabout();
   tesla = new Car("red.png", setLane()/*new PVector(80,-300)*/ , 10, numLanes);
   tesla.setColor(color(#E8351A));
+  tesla.manualControl = true;
   cars = new ArrayList();
   info = new Info(new PVector(10, 20), tesla, cars);
   sensor  = new Sensor(tesla,cars);
@@ -34,7 +35,13 @@ void setup() {
 }
 
 void draw() {
-
+  if (keyPressed) {
+      tesla.keycode = keyCode;
+  }
+  else{
+      tesla.keycode = 0;
+  }
+  
   background(0);
   
   pushMatrix();  
@@ -58,13 +65,11 @@ void setEnvironment(){
   tesla.setPosition();
   tesla.showSensor=true;
   tesla.draw();
+  println(tesla.timeLap, ' ', tesla.speed,' ', tesla.time2);
   for (Car car : cars) {
     car.setPosition();
     car.draw();
   }
-
-
-  
 }
 
 void initGUI() {
@@ -81,7 +86,7 @@ void initGUI() {
   cp5.addSlider("sliderCars")
     .setPosition(10, height-60)
     .setWidth(100)
-    .setRange(1, 10)
+    .setRange(1, 20)
     .setValue(10)
     .setNumberOfTickMarks(5)
     .setSliderMode(Slider.FLEXIBLE);
@@ -107,7 +112,7 @@ void addRandomCars(int n) {
   cars.clear();
   
   for (int j=0; j<n; j++) {
-    Car c = new Car("red.png",setLane(), (int)random(10, 20), numLanes);
+    Car c = new Car("red.png", setLane(), int(random(10, 20)), numLanes);
     c.setColor(color(#BDFCED));//(int)random(100, 255));
     cars.add(c);
   }

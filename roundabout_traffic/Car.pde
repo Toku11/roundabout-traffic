@@ -1,12 +1,15 @@
 /*Scale 10:1*/
-class Car {
+public class Car {
   PImage carImage;
   PVector position;
   color col;
-  int lastTime = 0, lastTime2 = 0, psi = 0, lanes, time, time2, countEffect = 0;
-  float angle, speed, timeLap, actionProbability = 0, radius ;
-  boolean change = false, yes=true;
+  int signLane,lastTime = 0, lastTime2 = 0, psi = 0, lanes, time, time2, countEffect = 0;
+  float angle, speed, timeLap, actionProbability = 0, radius, max_steer = 30.0 ;
+  float steerX = 0, steerY = 0, yaw = 0;
+  boolean change = false;
   boolean showSensor = false;
+  boolean manualControl = false;
+  int keycode = 0;
   utils utils = new utils();
   
   ArrayList<PVector> sensorRange = new ArrayList(7);
@@ -25,9 +28,7 @@ class Car {
     tint(col);
     pushMatrix();
     translate(this.position.x, -this.position.y);
-    if(yes==true)
     rotate(distanceToCenter().y);
-    else rotate(-HALF_PI);
     image(carImage, 0, 0);     
     popMatrix();
     /*println(carImage.width, carImage.height);*/
@@ -48,89 +49,128 @@ class Car {
   }
 
   public void vehicleMove() { 
-    speedStimation();
-    this.time = millis() - this.lastTime2;    
+    speedControl();
+    this.time = millis() - this.lastTime;  
     
-    if (utils.isBlocked(this.sensorRange,'f')){speedDown();}
-    
-    else if(utils.isVelMin(this.timeLap)){this.timeLap = random(10,20);}
-    
-    if (this.time >= 1000 || isChanging()) {
-      this.lastTime2 = millis();
-      movement();
+    if (!manualControl){
+      avoidFrontalCrash();
+      if (this.time >= 3000 || isChanging()) {
+        this.lastTime = millis();
+        movement();
       }
+    }
+      
+    else if((this.time>=200 && keycode!=0)||isChanging()){
+      this.lastTime = millis();
+      movement();
+    }
   } 
   
-  public void speedStimation(){
-    this.time2 = millis() - this.lastTime;
-    
+  public void avoidFrontalCrash(){
+      if (utils.isBlocked(this.sensorRange,'f')) speedDown();
+      else if(utils.isVelMin(this.timeLap)) this.timeLap = int(random(10,20));
+  }
+  
+
+  
+  public void speedControl(){
+    this.time2 = millis() - this.lastTime2;
     if (this.time2 >= this.timeLap) {
-      this.lastTime = millis();
-      this.speed = (radians(1) * (this.radius / (this.timeLap / 1000.0))) / 10;//10*m/s
-    
-    if (this.psi < 360) this.psi = this.psi + 1;    
-    else this.psi = 0;
+      speedStimate();
+      this.lastTime2 = millis();
+      if (this.psi < 360) this.psi = this.psi + 1;    
+      else this.psi = 0;
     
     }
   }
-    
+  
+  public void speedStimate(){
+    this.speed = ((this.radius * radians(1))/ (this.time2 / 1000.0)) / 10;//10*m/s
+  }
+  
   public void movement(){
     
-      if (!isChanging()) {
+      if (!isChanging() && !manualControl) {
           actionProbability = random(0,1);
       }
       
       if(isChanging()&&(this.radius==165||this.radius==135+this.lanes)) laneEffect();
       
-      if (utils.inRange(actionProbability,0.001,.3) && !utils.isVelMax(this.timeLap)){//speed up
+      if (isAllowed(actionProbability,'a') || keycode == 38)
+      {//speed up
           speedUp();
       }
-      else if (utils.inRange(actionProbability, 0.3,0.4) && !utils.isVelMin(this.timeLap)){//decrease speed
+      else if (isAllowed(actionProbability,'b') || keycode == 40)
+      {//decrease speed
           speedDown();
       }
-      else if (utils.inRange(actionProbability, 0.4,0.7) && this.radius < 135 + this.lanes && (!utils.isBlocked(this.sensorRange,'r')||isChanging())){//right lane chan
+      else if (isAllowed(actionProbability,'r') || (keycode == 39 && this.radius < 135 + this.lanes ))
+      {//right lane chan
+        actionProbability = 0.5;
         laneChange('r');
       }
-      else if (utils.inRange(actionProbability, 0.7,0.99) && this.radius >165 && (!utils.isBlocked(this.sensorRange,'l')||isChanging())){//left lane change
+      else if (isAllowed(actionProbability,'l') ||( keycode == 37 && this.radius >165))
+      {//left lane change
+        actionProbability = 0.8;
         laneChange('l');
-        
-
       }
       else{//keep
       }
   }
+  
+  public boolean isAllowed(float actionProbability, char movement){
+    
+    switch (movement){
       
+      case 'l':
+        return (utils.inRange(actionProbability, 0.7,0.99) && this.radius >165 && 
+                (!utils.isBlocked(this.sensorRange,'l')||isChanging()));
+                
+      case 'r':
+
+        return (utils.inRange(actionProbability, 0.4,0.7) && this.radius < 135 + this.lanes && 
+                (!utils.isBlocked(this.sensorRange,'r')||isChanging()));
+                
+      case 'a':
+        return (utils.inRange(actionProbability,0.01,.3) && !utils.isVelMax(this.timeLap));
+        
+      case 'b':
+        return (utils.inRange(actionProbability, 0.3,0.4) && !utils.isVelMin(this.timeLap));
+        
+      default:
+        return false;
+    }
+  }
+  
   public void speedUp(){
     this.timeLap = this.timeLap - 1;
   }
   
   public void speedDown(){
-    this.timeLap = this.timeLap + 2;
+    this.timeLap = this.timeLap + 1;
   }
-  
-  public void keepLastSpeed(){
-    if (this.speed > 10)
-    this.timeLap = ((this.radius * radians(1)) / (this.speed * 10)) * 1000.0;
-  }
-  
+   
   public void laneChange(char side){
     switch (side){
     
       case 'r':
          this.radius = this.radius + laneEffect();
-         keepLastSpeed();
+         signLane = 1;
          break;
       
       case 'l':
          this.radius = this.radius - laneEffect();
-         keepLastSpeed(); 
+         signLane = -1;
          break;
       
       default:
          break;
     }    
   }
+  
+  public void keepLastSpeed(){
 
+  }
  public boolean isChanging(){   
    return this.change;
  }
@@ -138,6 +178,8 @@ class Car {
  public int laneEffect(){
    if (this.countEffect >= 30){
      this.countEffect = 0;
+     this.timeLap = signLane*this.timeLap*radians(1)*30+this.timeLap;
+     actionProbability = -1;
      this.change = false;
      return 0;
    }

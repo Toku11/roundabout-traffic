@@ -1,4 +1,5 @@
 import controlP5.*;
+Thread loadThread;
 
 ControlP5 cp5;
 Roundabout roundabout;
@@ -9,7 +10,7 @@ Car tesla;
 PVector offset;
 ArrayList<Car> cars;
 
-int numLanes;
+int numLanes,i=0;
 boolean showInfo;
 boolean onlySimulation;
 
@@ -23,9 +24,16 @@ void setup() {
   stroke(255,255,255);
   offset = new PVector(width/2, height/2);
   roundabout = new Roundabout();
-  tesla = new Car("red.png", setLane()/*new PVector(80,-300)*/ , 10, numLanes);
+  tesla = new Car("red.png", setLane() , 10, numLanes);
   tesla.setColor(color(#E8351A));
   tesla.manualControl = true;
+  tesla.showSensor=true;
+  loadThread = new Thread(tesla);
+  loadThread.start();
+  
+  
+  
+  
   cars = new ArrayList();
   info = new Info(new PVector(10, 20), tesla, cars);
   sensor  = new Sensor(tesla,cars);
@@ -35,6 +43,7 @@ void setup() {
 }
 
 void draw() {
+ 
   if (keyPressed) {
       tesla.keycode = keyCode;
   }
@@ -43,15 +52,20 @@ void draw() {
   }
   
   background(0);
-  
   pushMatrix();  
   translate(offset.x, offset.y);
-  setEnvironment();
-  
+
+  roundabout.draw();   
+  tesla.draw();
+  println(tesla.timeLap, ' ', tesla.speed,' ', tesla.time2);
+  for (Car car : cars) {
+    car.setPosition();
+    car.draw();
+  }
   for (Car car : cars) {
     car.getSensorReadings(8);
   }
-    tesla.getSensorReadings(36); 
+  tesla.getSensorReadings(36); 
     //println(tesla.isChanging(), ' ' ,tesla.actionProbability,',' ,tesla.countEffect,' ',tesla.casemove,' ',tesla.radius);
   popMatrix();
   
@@ -60,16 +74,12 @@ void draw() {
   text("Framerate: "+frameRate, 10, height-10);
 }
 
+void stop(){
+  tesla.stop = true;
+  super.stop();
+}
+
 void setEnvironment(){
-  roundabout.draw();    
-  tesla.setPosition();
-  tesla.showSensor=true;
-  tesla.draw();
-  println(tesla.timeLap, ' ', tesla.speed,' ', tesla.time2);
-  for (Car car : cars) {
-    car.setPosition();
-    car.draw();
-  }
 }
 
 void initGUI() {

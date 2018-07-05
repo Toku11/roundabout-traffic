@@ -39,6 +39,10 @@
       }
       return false;
     }
+    
+    public int lane(float radius){
+      return (int)(radius-165)/30;
+    }
      
   }
  

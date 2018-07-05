@@ -3,9 +3,9 @@ public class Car {
   PImage carImage;
   PVector position;
   color col;
-  int signLane,lastTime = 0, lastTime2 = 0, psi = 0, lanes, time, time2, countEffect = 0;
+  int L=20,signLane,lastTime = 0, lastTime2 = 0, psi = 0, lanes, time, time2, countEffect = 0;
   float angle, speed, timeLap, actionProbability = 0, radius, max_steer = 30.0 ;
-  float steerX = 0, steerY = 0, yaw = 0;
+  float maxsteer = radians(30), yaw = 0, v = 0;
   boolean change = false;
   boolean showSensor = false;
   boolean manualControl = false;
@@ -40,13 +40,40 @@ public class Car {
 
 
   public void setPosition() {
-
-    vehicleMove();
-    float x = this.radius * cos(radians(this.psi));
-    float y = this.radius * sin(radians(this.psi));
+    clk();
+    delta = constrain(delta, -maxsteer,maxsteer);
+    this.position.x    += this.v * cos(yaw) * this.time;
+    this.position.y    += this.v * sin(yaw) * this.time;
+    yaw  += this.v/L * tan(delta)*this.time;
+    normalize_angle();    
+    this.v = acceleration * this.time;
+    
+    
+    //vehicleMove();
+    //float x = this.radius * cos(radians(this.psi));
+    //float y = this.radius * sin(radians(this.psi));
+    
     this.position = new PVector(x, y);
     
   }
+  
+  public int clk(){
+    this.time = millis() -this.time;
+    return this.time;
+  }
+
+  public float normalize_angle(){
+
+    while (yaw > PI){
+        yaw -= TWO_PI;
+    }
+    while (yaw < -PI){
+        angle += TWO_PI;
+    }
+   return yaw;
+  }
+
+
 
   public void vehicleMove() { 
     speedControl();

@@ -43,6 +43,15 @@
     public int lane(float radius){
       return (int)(radius-165)/30;
     }
+    
+    public ArrayList<Float> diff(ArrayList<Float> x){
+      ArrayList<Float> h = new ArrayList<Float>();
+      
+      for(int i = 0; i < x.size()-1; ++i){
+        h.add(i,x.get(i+1) - x.get(i));
+      }
+      return h;
+    }
      
   }
  

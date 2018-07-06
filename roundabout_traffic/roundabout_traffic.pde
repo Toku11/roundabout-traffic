@@ -6,6 +6,7 @@ Roundabout roundabout;
 Info info;
 Sensor sensor;
 Car tesla;
+Spline spline; 
 
 PVector offset;
 ArrayList<Car> cars;
@@ -31,8 +32,11 @@ void setup() {
   loadThread = new Thread(tesla);
   loadThread.start();
   
-  
-  
+  ArrayList<Float> x = new ArrayList<Float>();
+  x.addAll(java.util.Arrays.asList(-2.5, 0.0, 2.5, 5.0, 7.5, 3.0, -1.0));
+  ArrayList<Float> y = new ArrayList<Float>();
+  y.addAll(java.util.Arrays.asList(0.7, -6.0, 5.0, 6.5, 0.0, 5.0, -2.0));
+  spline = new Spline(x,y);
   
   cars = new ArrayList();
   info = new Info(new PVector(10, 20), tesla, cars);
@@ -57,7 +61,7 @@ void draw() {
 
   roundabout.draw();   
   tesla.draw();
-  println(tesla.timeLap, ' ', tesla.speed,' ', tesla.time2);
+ // println(tesla.timeLap, ' ', tesla.speed,' ', tesla.time2);
   for (Car car : cars) {
     car.setPosition();
     car.draw();

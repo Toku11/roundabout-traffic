@@ -12,7 +12,7 @@ public class Car extends Thread{
   int keycode = 0;
   utils utils = new utils();
   
-  ArrayList<PVector> sensorRange = new ArrayList(7);
+  ArrayList<PVector> sensorRange = new ArrayList();
   
   Car(String image, PVector position, int timeLap/*ms*/, int lanes) {
     this.position = position;
@@ -195,9 +195,7 @@ public class Car extends Thread{
     }    
   }
   
-  public void keepLastSpeed(){
 
-  }
  public boolean isChanging(){   
    return this.change;
  }

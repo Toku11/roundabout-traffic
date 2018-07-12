@@ -6,7 +6,7 @@ Roundabout roundabout;
 Info info;
 Sensor sensor;
 Car tesla;
-Spline spline; 
+Spline2D spline2D; 
 
 PVector offset;
 ArrayList<Car> cars;
@@ -14,7 +14,7 @@ ArrayList<Car> cars;
 int numLanes,i=0;
 boolean showInfo;
 boolean onlySimulation;
-
+Utils utils = new Utils();
 
 
 void setup() {
@@ -32,11 +32,15 @@ void setup() {
   loadThread = new Thread(tesla);
   loadThread.start();
   
-  ArrayList<Float> x = new ArrayList<Float>();
-  x.addAll(java.util.Arrays.asList(-2.5, 0.0, 2.5, 5.0, 7.5, 3.0, -1.0));
-  ArrayList<Float> y = new ArrayList<Float>();
-  y.addAll(java.util.Arrays.asList(0.7, -6.0, 5.0, 6.5, 0.0, 5.0, -2.0));
-  spline = new Spline(x,y);
+  float [] x = {-2.5, 0.0, 2.5, 5.0, 7.5, 3.0, -1.0};
+  float [] y = {0.7, -6.0, 5.0, 6.5, 0.0, 5.0, -2.0};
+
+  spline2D = new Spline2D(x,y);
+  float [] s = utils.arange(0.0,spline2D.s[spline2D.s.length-1],0.1);
+  for(float val : s){
+    spline2D.calc_position(val);
+  }
+  
   
   cars = new ArrayList();
   info = new Info(new PVector(10, 20), tesla, cars);

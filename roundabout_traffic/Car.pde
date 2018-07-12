@@ -10,7 +10,7 @@ public class Car extends Thread{
   boolean showSensor = false;
   boolean manualControl = false, stop = false;
   int keycode = 0;
-  utils utils = new utils();
+  Utils utils = new Utils();
   
   ArrayList<PVector> sensorRange = new ArrayList();
   

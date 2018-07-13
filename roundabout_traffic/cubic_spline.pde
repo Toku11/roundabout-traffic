@@ -4,6 +4,7 @@ class Spline {
   Utils utils = new Utils();
   ArrayList<Float> d = new ArrayList<Float>();
   ArrayList<Float> b = new ArrayList<Float>();
+  double[] c;
   
   Spline(float[] x, float[] y ){
      this.x = x;
@@ -13,7 +14,7 @@ class Spline {
      float[] B = __calc_B(h);
      Utils.Matrix matrix = utils.new Matrix(A);
      //matrix.mPrint();
-     double[] c = matrix.solve(B,true);
+     c = matrix.solve(B,true);
      for (int i = 0; i < x.length-1; i++){
        d.add((float)(c[i+1] - c[i]) / (3.0 * h[i]));
        float tb =(float)((y[i + 1] - y[i]) / h[i] - h[i] * 
@@ -21,14 +22,35 @@ class Spline {
        b.add(tb);
      }
   }
+  
      public float calc(float t) {
        if (t < this.x[0]) return 0.0;
        else if(t > this.x[x.length-1]) return 0.0;
        int i = __search_index(t);
-       print("t= "+t+"i= "+i, "*** ");
-       return 0.0;
+       float dx = t - this.x[i];
+       float result = this.y[i] + this.b.get(i) * dx
+             + (float)this.c[i] * pow(dx,2) + this.d.get(i) * pow(dx,3);
+       return result;
      }
      
+     public float calcd(float t){
+       if (t < this.x[0]) return 0.0;
+       else if(t > this.x[x.length-1]) return 0.0;
+       int i = __search_index(t);
+       float dx = t - this.x[i];
+       float result = this.b.get(i) + 2.0 * (float)this.c[i] * dx + 3.0 
+             * this.d.get(i) * pow(dx, 2);
+       return result;
+     }
+     
+     public float calcdd(float t){
+       if (t < this.x[0]) return 0.0;
+       else if(t > this.x[x.length-1]) return 0.0;
+       int i = __search_index(t);
+       float dx = t - this.x[i];
+       float result = 2.0 * (float)this.c[i] + 6.0 * this.d.get(i) * dx;
+       return result;
+     }
      
      private float[][] __calc_A(float[] h){
         int nx = h.length + 1;
@@ -82,8 +104,8 @@ class Spline2D{
     float[] dx = utils.diff(x);
     float[] dy = utils.diff(y);
     float[] ds = new float[dx.length];
-    
-    for(i = 0; i < dx.length; i++){
+
+    for(int i = 0; i < dx.length; i++){
       ds[i] = sqrt(pow(dx[i], 2) + pow(dy[i],2));
     }  
     float[] s = {0};
@@ -91,8 +113,25 @@ class Spline2D{
     return ds;
   }
   
-  public void calc_position(float s){
+  public float[] calc_position(float s){
     float x = sx.calc(s);
     float y = sy.calc(s);
-}
+    return new float[] {x,y};
+  }
+  
+  public double calc_yaw(float s){
+    float dx = sx.calcd(s);
+    float dy = sy.calcd(s);
+    double yaw = atan2(dy,dx);
+    return yaw;
+  }
+  
+  public double calc_curvature(float s){
+    double dx  = sx.calcd(s);
+    double ddx = sx.calcdd(s); 
+    double dy  = sy.calcd(s);
+    double ddy = sy.calcdd(s);
+    double k   = (ddy *dx - ddx * dy) / (Math.pow((Math.pow(dx, 2.0) + Math.pow(dy, 2.0)), 3 / 2));
+    return k;
+  }
 }

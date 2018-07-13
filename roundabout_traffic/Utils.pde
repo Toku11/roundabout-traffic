@@ -63,7 +63,7 @@ public class Utils {
   
   public float[] arrayListToArray(ArrayList<Float> arrayList){
     float[] array = new float[arrayList.size()];
-    i = 0;
+    int i = 0;
     for(float x : arrayList){
       array[i] = x;
       ++i;

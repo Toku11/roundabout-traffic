@@ -34,11 +34,18 @@ void setup() {
   
   float [] x = {-2.5, 0.0, 2.5, 5.0, 7.5, 3.0, -1.0};
   float [] y = {0.7, -6.0, 5.0, 6.5, 0.0, 5.0, -2.0};
-
+  ArrayList<Float> rx = new ArrayList<Float>();
+  ArrayList<Float> ry = new ArrayList<Float>();
+  ArrayList<Double> ryaw = new ArrayList<Double>();
+  ArrayList<Double> rk = new ArrayList<Double>();
   spline2D = new Spline2D(x,y);
   float [] s = utils.arange(0.0,spline2D.s[spline2D.s.length-1],0.1);
+ 
   for(float val : s){
-    spline2D.calc_position(val);
+    rx.add(spline2D.calc_position(val)[0]);
+    ry.add(spline2D.calc_position(val)[1]);
+    ryaw.add(spline2D.calc_yaw(val));
+    rk.add(spline2D.calc_curvature(val));
   }
   
   

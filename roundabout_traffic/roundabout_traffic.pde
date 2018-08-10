@@ -6,14 +6,12 @@ Roundabout roundabout;
 Info info;
 Sensor sensor;
 Car tesla;
-CubicSplinePlanner csp = new CubicSplinePlanner();
 Utils utils = new Utils();
 PVector offset;
 ArrayList<Car> cars;
 int numLanes,i=0;
 boolean showInfo;
 boolean onlySimulation;
-ArrayList<ArrayList<Float>> spline;
 
 
 void setup() {
@@ -30,13 +28,6 @@ void setup() {
   tesla.showSensor=true;
   loadThread = new Thread(tesla);
   loadThread.start();
-  
-  float [] x = {-2.5,100,-200};
-  float [] y = {0.7, 100,20};
-
-  spline = csp.calc_spline_course(x,y,0.5);
-  println(spline.get(0).size());
-  
 
   cars = new ArrayList();
   info = new Info(new PVector(10, 20), tesla, cars);
@@ -58,9 +49,7 @@ void draw() {
   background(0);
   pushMatrix();  
   translate(offset.x, offset.y);
-  for (int i = 0; i < spline.get(0).size();++i){
-    point(spline.get(0).get(i), -spline.get(1).get(i));
-   }
+
   roundabout.draw();   
   tesla.draw();
  // println(tesla.timeLap, ' ', tesla.speed,' ', tesla.time2);

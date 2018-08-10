@@ -11,6 +11,8 @@ public class Car extends Thread{
   boolean manualControl = false, stop = false;
   int keycode = 0;
   Utils utils = new Utils();
+  CubicSplinePlanner csp = new CubicSplinePlanner();
+
   
   ArrayList<PVector> sensorRange = new ArrayList();
   
@@ -22,15 +24,20 @@ public class Car extends Thread{
     carImage = loadImage(image);
     carImage.resize(50,20);
     imageMode(CENTER);
+
   }
 
   public void draw() {   
+    PVector kk = new PVector(0,350,0);
     tint(col);
     pushMatrix();
     translate(this.position.x, -this.position.y);
     rotate(distanceToCenter().y);
     image(carImage, 0, 0);     
     popMatrix();
+    if(showSensor){
+      createSpline(position,kk);
+    }
     /*println(carImage.width, carImage.height);*/
   }
 
@@ -288,6 +295,31 @@ public class Car extends Thread{
     else if (abs(k.y) < PI / 4 && k.x < vector.x) return 3;
     else if (k.y <= -PI/4 && k.y >= -3*PI/4 && k.x < vector.y) return 4;
     else return 0;
+  }
+  
+  private ArrayList<ArrayList<Float>> createSpline(PVector iPos, PVector fPos){
+    //Es necesario crear x y y para el spline 
+    ArrayList<Float> x_list = new ArrayList<Float>();
+    ArrayList<Float> y_list = new ArrayList<Float>();
+    ArrayList<ArrayList<Float>> spline;
+    
+    x_list.add(iPos.x);
+    y_list.add(iPos.y);
+    x_list.add(fPos.x);
+    y_list.add(fPos.y);
+    
+    float[] x = utils.arrayListToArray(x_list);
+    float[] y = utils.arrayListToArray(y_list);
+
+    spline = csp.calc_spline_course(x,y,0.5);
+    printSpline(spline);
+    return spline;
+  }
+  
+  private void printSpline(ArrayList<ArrayList<Float>> spline){
+    for (int i = 0; i < spline.get(0).size();++i){
+      point(spline.get(0).get(i), -spline.get(1).get(i));
+   }
   }
   
   public void run(){

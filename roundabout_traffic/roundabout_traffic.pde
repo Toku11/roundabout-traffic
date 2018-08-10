@@ -6,15 +6,14 @@ Roundabout roundabout;
 Info info;
 Sensor sensor;
 Car tesla;
-Spline2D spline2D; 
-
+CubicSplinePlanner csp = new CubicSplinePlanner();
+Utils utils = new Utils();
 PVector offset;
 ArrayList<Car> cars;
-
 int numLanes,i=0;
 boolean showInfo;
 boolean onlySimulation;
-Utils utils = new Utils();
+ArrayList<ArrayList<Float>> spline;
 
 
 void setup() {
@@ -32,23 +31,13 @@ void setup() {
   loadThread = new Thread(tesla);
   loadThread.start();
   
-  float [] x = {-2.5, 0.0, 2.5, 5.0, 7.5, 3.0, -1.0};
-  float [] y = {0.7, -6.0, 5.0, 6.5, 0.0, 5.0, -2.0};
-  ArrayList<Float> rx = new ArrayList<Float>();
-  ArrayList<Float> ry = new ArrayList<Float>();
-  ArrayList<Double> ryaw = new ArrayList<Double>();
-  ArrayList<Double> rk = new ArrayList<Double>();
-  spline2D = new Spline2D(x,y);
-  float [] s = utils.arange(0.0,spline2D.s[spline2D.s.length-1],0.1);
- 
-  for(float val : s){
-    rx.add(spline2D.calc_position(val)[0]);
-    ry.add(spline2D.calc_position(val)[1]);
-    ryaw.add(spline2D.calc_yaw(val));
-    rk.add(spline2D.calc_curvature(val));
-  }
+  float [] x = {-2.5,100,-200};
+  float [] y = {0.7, 100,20};
+
+  spline = csp.calc_spline_course(x,y,0.5);
+  println(spline.get(0).size());
   
-  
+
   cars = new ArrayList();
   info = new Info(new PVector(10, 20), tesla, cars);
   sensor  = new Sensor(tesla,cars);
@@ -69,7 +58,9 @@ void draw() {
   background(0);
   pushMatrix();  
   translate(offset.x, offset.y);
-
+  for (int i = 0; i < spline.get(0).size();++i){
+    point(spline.get(0).get(i), -spline.get(1).get(i));
+   }
   roundabout.draw();   
   tesla.draw();
  // println(tesla.timeLap, ' ', tesla.speed,' ', tesla.time2);

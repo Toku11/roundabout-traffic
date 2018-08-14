@@ -51,6 +51,7 @@ void draw() {
   translate(offset.x, offset.y);
 
   roundabout.draw();   
+  tesla.getSensorReadings(36); 
   tesla.draw();
  // println(tesla.timeLap, ' ', tesla.speed,' ', tesla.time2);
   for (Car car : cars) {
@@ -60,7 +61,7 @@ void draw() {
   for (Car car : cars) {
     car.getSensorReadings(8);
   }
-  tesla.getSensorReadings(36); 
+
     //println(tesla.isChanging(), ' ' ,tesla.actionProbability,',' ,tesla.countEffect,' ',tesla.casemove,' ',tesla.radius);
   popMatrix();
   

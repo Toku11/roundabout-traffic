@@ -28,7 +28,7 @@ public class Car extends Thread{
   }
 
   public void draw() {   
-    PVector kk = new PVector(0,350,0);
+    PVector kk = new PVector(0,350,atan2(350,0) * 180 / PI);
     tint(col);
     pushMatrix();
     translate(this.position.x, -this.position.y);
@@ -36,7 +36,10 @@ public class Car extends Thread{
     image(carImage, 0, 0);     
     popMatrix();
     if(showSensor){
-      createSpline(position,kk);
+      for(int i = 0; i < lanes/30; i++){
+        printSpline(createSpline(position,kk, i));
+
+      }
     }
     /*println(carImage.width, carImage.height);*/
   }
@@ -297,7 +300,7 @@ public class Car extends Thread{
     else return 0;
   }
   
-  private ArrayList<ArrayList<Float>> createSpline(PVector iPos, PVector fPos){
+  private ArrayList<ArrayList<Float>> createSpline(PVector iPos, PVector fPos,int lane){
     //Es necesario crear x y y para el spline 
     ArrayList<Float> x_list = new ArrayList<Float>();
     ArrayList<Float> y_list = new ArrayList<Float>();
@@ -307,12 +310,29 @@ public class Car extends Thread{
     y_list.add(iPos.y);
     x_list.add(fPos.x);
     y_list.add(fPos.y);
-    
+    fPos.z = fPos.z < 0 ? fPos.z + 360 : fPos.z;
+
+    if(this.psi < fPos.z-20){
+      for(i = this.psi; i < 360; i = i + 30){
+        if(i > this.psi && i < fPos.z-10){
+          x_list.add(x_list.size()-1, (165 + 30*lane) * cos(radians(i)));
+          y_list.add(y_list.size()-1, (165 + 30*lane) * sin(radians(i)));
+        }
+      }    
+    }
+    else{
+      for(i = this.psi; i < 360+fPos.z-15; i = i + 30){
+        if(i > this.psi){
+          x_list.add(x_list.size()-1, (165 + 30*lane) * cos(radians(i)));
+          y_list.add(y_list.size()-1, (165 + 30*lane) * sin(radians(i)));
+        }
+      }       
+    }
+
     float[] x = utils.arrayListToArray(x_list);
     float[] y = utils.arrayListToArray(y_list);
 
     spline = csp.calc_spline_course(x,y,0.5);
-    printSpline(spline);
     return spline;
   }
   

@@ -33,7 +33,6 @@ void setup() {
   info = new Info(new PVector(10, 20), tesla, cars);
   sensor  = new Sensor(tesla,cars);
   initGUI();
-  
   //surface.setVisible(false);
 }
 

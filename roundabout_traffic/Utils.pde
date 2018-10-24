@@ -47,7 +47,7 @@ public class Utils {
     return false;
   }
 
-  public int lane(float radius) {
+  public int lane(float radius) {// calculate discrete difference along the x axis
     return (int)(radius-165)/30;
   }
 
@@ -100,7 +100,7 @@ public class Utils {
    for(float x : B){
       aux.add(x);
     }
-   output =arrayListToArray(aux);
+   output = arrayListToArray(aux);
    return output;
   }
   
@@ -113,7 +113,33 @@ public class Utils {
     }
     return i;
   }
-
+  
+  public float[] clip_(float[] array, float min, float max){
+    for (int i = 0; i < array.length; i++){
+      array[i] = (min < array[i]) ? array[i] : min;
+      array[i] = (max > array[i]) ? array[i] : max;
+    }
+    println(array);
+    return array;
+  }
+  
+  public float clip_(float val, float min, float max){
+      val = (min < val) ? val : min;
+      val = (max > val) ? val : max;
+    return val;
+  }
+  
+  public float normalizeAngle(float angle){
+    while (angle > PI){
+      angle -= TWO_PI;
+    }
+    
+    while (angle < - PI){
+      angle += TWO_PI ;
+    }
+    return angle;
+  }
+  
   public class Matrix {
     double[][] matrix, origMat;
     int[] piv;

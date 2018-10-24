@@ -28,7 +28,7 @@ public class Car extends Thread{
   }
 
   public void draw() {   
-    PVector kk = new PVector(0,350,atan2(350,0) * 180 / PI);
+    PVector kk = new PVector(0,180 + lanes ,atan2(350,0) * 180 / PI);
     tint(col);
     pushMatrix();
     translate(this.position.x, -this.position.y);
@@ -67,22 +67,9 @@ public class Car extends Thread{
   }
   
   public int clk(){
-    this.time = millis() -this.time;
+    this.time = millis() - this.time;
     return this.time;
   }
-
-  public float normalize_angle(){
-
-    while (yaw > PI){
-        yaw -= TWO_PI;
-    }
-    while (yaw < -PI){
-        angle += TWO_PI;
-    }
-   return yaw;
-  }
-
-
 
   public void vehicleMove() { 
     speedControl();

@@ -134,7 +134,7 @@ public class Utils {
       angle -= TWO_PI;
     }
     
-    while (angle < - PI){
+    while(angle < - PI){
       angle += TWO_PI ;
     }
     return angle;

@@ -5,18 +5,33 @@ maintainer: Tokunaga Oscar oscar.tokunaga@cinvestav.com
 */
 
 class Vehicle extends Thread{
+  PImage vImage;
   int time = 0, lanes;
   float v = 0.0f, Kp = 1.0, k = 0.5,
         L = 2.9f, max_steer = radians(30.0);
   PVector pose = new PVector();
   Utils utils = new Utils();
   CubicSplinePlanner csp = new CubicSplinePlanner();
-
-  Vehicle(PVector pose, float vel, int lanes){
-    this.pose = pose;
+  ArrayList<ArrayList<Float>> spline;
+  
+  Vehicle(float vel, int lanes){
     this.v = vel;
     this.lanes = lanes;
+    vImage = loadImage("red.png");
+    vImage.resize(50,20);
+    imageMode(CENTER);
+    this.spline = createSpline(new int[]{1,3},3);
   } 
+  
+  public void draw() {   
+    updateState(0.0,0);
+    pushMatrix();
+    translate(this.pose.x, this.pose.y);
+    rotate(this.pose.z);
+    image(vImage, 0, 0);  
+    popMatrix();
+    printSpline(this.spline);
+  }
   
   void updateState(float accel, float delta){
     utils.clip_(delta, -max_steer, max_steer);
@@ -73,66 +88,90 @@ class Vehicle extends Thread{
   private ArrayList<PVector> initializeSpline(int[]inOut){
     ArrayList<PVector> output = new ArrayList<PVector>();
     PVector pos;
+    float x, y, phi;
     for(int set : inOut){
       switch(set){
         case 1:{
-          pos = new PVector(0, -(180 + 30 * lanes));
+          x = 0;
+          y = -(180 + 30 * lanes);
           break;}
         case 2:{
-          pos = new PVector((180 + 30 * lanes), 0);     
+          x = (180 + 30 * lanes);
+          y = 0;  
           break;}
         case 3:{
-          pos = new PVector(0, (180 + 30 * lanes));
+          x = 0;
+          y = (180 + 30 * lanes);
           break;}
         case 4:{
-          pos = new PVector(-(180 + 30 * lanes), 0);
+          x = -(180 + 30 * lanes);
+          y = 0;
           break;}
         default:{
-          print("Not a valid Lane specified: setting to 0");
-          pos = new PVector(0, -(180 + 30 * lanes));
+          println("Not a valid Lane specified: setting to 0");
+          x = 0;
+          y = -(180 + 30 * lanes);
           break;}
       }
+      phi = atan2(y,x);
+      pos = new PVector(x,y,phi);
       output.add(pos);
     }
     return output;
   }
   
   
-  private ArrayList<ArrayList<Float>> createSpline(int[] inOut, int lane){
-    //Es necesario crear x y y para el spline 
+  public ArrayList<ArrayList<Float>> createSpline(int[] inOut, int lane){
     ArrayList<PVector> splineVals = initializeSpline(inOut);
     PVector iPos = splineVals.get(0), fPos = splineVals.get(1);
     ArrayList<Float> x_list = new ArrayList<Float>();
     ArrayList<Float> y_list = new ArrayList<Float>();
     ArrayList<ArrayList<Float>> spline;
-    
+    iPos.z += PI; // Rotación para dibujar el vehiculo
+    fPos.z = (fPos.z < 0) ? fPos.z + TWO_PI : fPos.z;
+    this.pose = iPos;
     x_list.add(iPos.x);
     y_list.add(iPos.y);
     x_list.add(fPos.x);
     y_list.add(fPos.y);
-    fPos.z = fPos.z < 0 ? fPos.z + 360 : fPos.z;
-
-    if(this.psi < fPos.z-20){
-      for(i = this.psi; i < 360; i = i + 30){
-        if(i > this.psi && i < fPos.z-10){
-          x_list.add(x_list.size()-1, (165 + 30*lane) * cos(radians(i)));
-          y_list.add(y_list.size()-1, (165 + 30*lane) * sin(radians(i)));
-        }
-      }    
+    
+    PVector globalPose = distanceToCenter();
+    float curveLength = fPos.z - globalPose.z;
+    curveLength = (curveLength <= 0) ? TWO_PI + curveLength : curveLength;
+    println(globalPose.z, fPos.z, curveLength);
+    
+    for(float i = globalPose.z + PI/12; i < globalPose.z + curveLength - PI/12; i += PI/6){
+      x_list.add(x_list.size() - 1, (165 + 30 * lane) * cos(i));
+      y_list.add(y_list.size() - 1, (165 + 30 * lane) * sin(i));
     }
-    else{
-      for(i = this.psi; i < 360+fPos.z-15; i = i + 30){
-        if(i > this.psi){
-          x_list.add(x_list.size()-1, (165 + 30*lane) * cos(radians(i)));
-          y_list.add(y_list.size()-1, (165 + 30*lane) * sin(radians(i)));
-        }
-      }       
-    }
-
+    
     float[] x = utils.arrayListToArray(x_list);
     float[] y = utils.arrayListToArray(y_list);
+    spline = csp.calc_spline_course(x, y, 0.1);
+    return spline;
+    
+  }
+  
+  private void printSpline(ArrayList<ArrayList<Float>> spline){
+    for (int i = 0; i < spline.get(0).size();++i){
+      point(spline.get(0).get(i), spline.get(1).get(i));
+    }
+  }
+  
+  public PVector distanceToCenter() {
+    float x = this.pose.x; 
+    float y = this.pose.y;
+    float d2center = sqrt(pow(x, 2) + pow(y, 2));
+    float angle = atan2(y, x);
+    angle = (angle < 0) ? angle + TWO_PI : angle;
+    return new PVector (d2center, d2center, angle);
+  }
+   /* 
+    fPos.z = fPos.z < 0 ? fPos.z + 360 : fPos.z;
 
-    spline = csp.calc_spline_course(x,y,0.5);
+
+
+    
     return spline;
   }*/
 }

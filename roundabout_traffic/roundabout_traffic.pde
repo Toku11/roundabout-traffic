@@ -12,7 +12,7 @@ ArrayList<Car> cars;
 int numLanes,i=0;
 boolean showInfo;
 boolean onlySimulation;
-
+Vehicle vehicle;
 
 void setup() {
   
@@ -34,6 +34,8 @@ void setup() {
   sensor  = new Sensor(tesla,cars);
   initGUI();
   //surface.setVisible(false);
+  
+  vehicle = new Vehicle(0.0,5);
 }
 
 void draw() {
@@ -46,11 +48,14 @@ void draw() {
   }
   
   background(0);
-  pushMatrix();  
-  translate(offset.x, offset.y);
+  pushMatrix(); 
+  scale(1,-1);
+  translate(offset.x, -offset.y);
+
 
   roundabout.draw();   
-  tesla.getSensorReadings(36); 
+  vehicle.draw();
+  /*tesla.getSensorReadings(36); 
   tesla.draw();
  // println(tesla.timeLap, ' ', tesla.speed,' ', tesla.time2);
   for (Car car : cars) {
@@ -59,7 +64,7 @@ void draw() {
   }
   for (Car car : cars) {
     car.getSensorReadings(8);
-  }
+  }*/
 
     //println(tesla.isChanging(), ' ' ,tesla.actionProbability,',' ,tesla.countEffect,' ',tesla.casemove,' ',tesla.radius);
   popMatrix();

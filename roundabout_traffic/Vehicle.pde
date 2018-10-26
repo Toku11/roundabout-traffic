@@ -7,7 +7,7 @@ maintainer: Tokunaga Oscar oscar.tokunaga@cinvestav.com
 class Vehicle extends Thread{
   PImage vImage;
   int time = 0, lanes;
-  float v = 0.0f, Kp = 1.0, k = 0.5,
+  float v = 0.0f, Kp = 1.0, k = 0.5, targetSpeed = 0,
         L = 2.9f, max_steer = radians(30.0);
   PVector pose = new PVector();
   Utils utils = new Utils();
@@ -15,16 +15,16 @@ class Vehicle extends Thread{
   ArrayList<ArrayList<Float>> spline;
   
   Vehicle(float vel, int lanes){
-    this.v = vel;
+    this.targetSpeed = vel;
     this.lanes = lanes;
     vImage = loadImage("red.png");
     vImage.resize(50,20);
     imageMode(CENTER);
-    this.spline = createSpline(new int[]{1,3},3);
+    this.spline = createSpline(new int[]{2,5},3);
   } 
   
   public void draw() {   
-    updateState(0.0,0);
+    main1();
     pushMatrix();
     translate(this.pose.x, this.pose.y);
     rotate(this.pose.z);
@@ -33,14 +33,23 @@ class Vehicle extends Thread{
     printSpline(this.spline);
   }
   
+  void main1(){
+    int targetIdx = (int)calcTargetIdx(spline)[0];
+    println(targetIdx);
+    float ai = pControl(this.targetSpeed, this.v);
+    float[] sc = stanleyControl(this.spline, targetIdx);
+    //println(ai, sc[0]);
+    updateState(ai,sc[0]);
+  }
   void updateState(float accel, float delta){
     utils.clip_(delta, -max_steer, max_steer);
     float dt = clk() / 1000; 
     this.pose.x += this.v * cos(this.pose.z) * dt;
     this.pose.y += this.v * sin(this.pose.z) * dt;
+    println(degrees(this.pose.z));
     this.pose.z += this.v / L * tan(delta) * dt;
     this.pose.z = utils.normalizeAngle(this.pose.z);
-    this.v = accel * dt;
+    this.v += accel * dt;
   }
   
   int clk(){

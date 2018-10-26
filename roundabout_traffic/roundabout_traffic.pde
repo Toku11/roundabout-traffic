@@ -35,7 +35,7 @@ void setup() {
   initGUI();
   //surface.setVisible(false);
   
-  vehicle = new Vehicle(0.0,5);
+  vehicle = new Vehicle(1,4);
 }
 
 void draw() {

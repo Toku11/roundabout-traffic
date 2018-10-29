@@ -9,6 +9,7 @@ Car tesla;
 Utils utils = new Utils();
 PVector offset;
 ArrayList<Car> cars;
+ArrayList<Vehicle> vehicles;
 int numLanes,i=0;
 boolean showInfo;
 boolean onlySimulation;
@@ -22,6 +23,8 @@ void setup() {
   stroke(255,255,255);
   offset = new PVector(width/2, height/2);
   roundabout = new Roundabout();
+  
+  
   tesla = new Car("red.png", setLane() , 10, numLanes);
   tesla.setColor(color(#E8351A));
   tesla.manualControl = true;
@@ -30,12 +33,14 @@ void setup() {
   loadThread.start();
 
   cars = new ArrayList();
+  vehicles = new ArrayList();
+  
   info = new Info(new PVector(10, 20), tesla, cars);
   sensor  = new Sensor(tesla,cars);
   initGUI();
-  //surface.setVisible(false);
-  
   vehicle = new Vehicle(1,4);
+
+  //surface.setVisible(false);
 }
 
 void draw() {
@@ -54,7 +59,14 @@ void draw() {
 
 
   roundabout.draw();   
-  vehicle.draw();
+  //vehicle.draw();
+  for(int i = 0; i < vehicles.size(); i++){
+    if(vehicles.get(i).lastIdx - 10 <= vehicles.get(i).targetIdx){
+      vehicles.remove(i); 
+    }
+    else 
+    vehicles.get(i).draw();
+  }
   /*tesla.getSensorReadings(36); 
   tesla.draw();
  // println(tesla.timeLap, ' ', tesla.speed,' ', tesla.time2);
@@ -97,7 +109,7 @@ void initGUI() {
     .setPosition(10, height-60)
     .setWidth(100)
     .setRange(1, 20)
-    .setValue(10)
+    .setValue(5)
     .setNumberOfTickMarks(5)
     .setSliderMode(Slider.FLEXIBLE);
     
@@ -120,8 +132,14 @@ void sliderCars(int value) {
 void addRandomCars(int n) {
   
   cars.clear();
-  
-  for (int j=0; j<n; j++) {
+  vehicles.clear();
+
+  for (int j=0; j < n; j++) {
+    Vehicle v = new Vehicle(2,(int)random(1,5));
+    loadThread = new Thread(v);
+    loadThread.start();
+    vehicles.add(v);
+    
     Car c = new Car("red.png", setLane(), int(random(10, 20)), numLanes);
     c.setColor(color(#BDFCED));//(int)random(100, 255));
     cars.add(c);

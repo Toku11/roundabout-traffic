@@ -70,7 +70,13 @@ public class Utils {
     }
     return array;
   }
-
+  public PVector doubleArrayListToPVector(ArrayList<ArrayList<Float>> arrayList){
+    PVector output = new PVector();
+    output.x = arrayList.get(0).get(0);
+    output.y = arrayList.get(1).get(0);
+    output.z = arrayList.get(2).get(0);
+    return output;
+  }
   public  float[] arange(float start, float stop, float step) {
     ArrayList<Float> output = new ArrayList<Float>();
     for (Float i = start; i < stop; i+=step) {
@@ -119,7 +125,7 @@ public class Utils {
       array[i] = (min < array[i]) ? array[i] : min;
       array[i] = (max > array[i]) ? array[i] : max;
     }
-    println(array);
+    //println(array);
     return array;
   }
   

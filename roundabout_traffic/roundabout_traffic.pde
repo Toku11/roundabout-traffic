@@ -3,12 +3,11 @@ Thread loadThread;
 
 ControlP5 cp5;
 Roundabout roundabout;
-Info info;
+//Info info;
 Sensor sensor;
-Car tesla;
 Utils utils = new Utils();
 PVector offset;
-ArrayList<Car> cars;
+//ArrayList<Car> cars;
 ArrayList<Vehicle> vehicles;
 int numLanes,i=0;
 boolean showInfo;
@@ -18,40 +17,30 @@ Vehicle vehicle;
 void setup() {
   
   size(1000, 1000);
-  frameRate(500);
+  frameRate(100);
   colorMode(RGB,255);
   stroke(255,255,255);
   offset = new PVector(width/2, height/2);
   roundabout = new Roundabout();
-  
-  
-  tesla = new Car("red.png", setLane() , 10, numLanes);
-  tesla.setColor(color(#E8351A));
-  tesla.manualControl = true;
-  tesla.showSensor=true;
-  loadThread = new Thread(tesla);
-  loadThread.start();
-
-  cars = new ArrayList();
   vehicles = new ArrayList();
   
-  info = new Info(new PVector(10, 20), tesla, cars);
-  sensor  = new Sensor(tesla,cars);
+  //info = new Info(new PVector(10, 20), tesla, cars);
+  //sensor  = new Sensor(tesla,cars);
   initGUI();
-  vehicle = new Vehicle(1,4);
+  vehicle = new Vehicle(2,4);
 
   //surface.setVisible(false);
 }
 
 void draw() {
- 
+ /*
   if (keyPressed) {
       tesla.keycode = keyCode;
   }
   else{
       tesla.keycode = 0;
   }
-  
+  */
   background(0);
   pushMatrix(); 
   scale(1,-1);
@@ -82,12 +71,12 @@ void draw() {
   popMatrix();
   
   
-  info.draw(showInfo);
+ // info.draw(showInfo);
   text("Framerate: "+frameRate, 10, height-10);
 }
 
 void stop(){
-  tesla.stop = true;
+  //tesla.stop = true;
   super.stop();
 }
 
@@ -114,10 +103,10 @@ void initGUI() {
     .setSliderMode(Slider.FLEXIBLE);
     
 
-  cp5.addToggle("showInfo")
+/*  cp5.addToggle("showInfo")
     .setPosition(10, height-100)
     .setSize(20, 20)
-    .setValue(true);
+    .setValue(true);*/
 
   cp5.addToggle("onlySimulation")
     .setPosition(80, height-100)
@@ -126,30 +115,30 @@ void initGUI() {
 }
 
 void sliderCars(int value) {
-  if (cars.size() != value) addRandomCars(value);
+  if (vehicles.size() != value) addRandomCars(value);
 }
 
 void addRandomCars(int n) {
   
-  cars.clear();
+  //cars.clear();
   vehicles.clear();
 
   for (int j=0; j < n; j++) {
-    Vehicle v = new Vehicle(2,(int)random(1,5));
+    Vehicle v = new Vehicle(1,(int)random(1,5));
     loadThread = new Thread(v);
     loadThread.start();
     vehicles.add(v);
-    
+  /*  
     Car c = new Car("red.png", setLane(), int(random(10, 20)), numLanes);
     c.setColor(color(#BDFCED));//(int)random(100, 255));
-    cars.add(c);
+    cars.add(c);*/
   }
   
 }
   
 void sliderLanes(int value){
   numLanes = value;
-  tesla.lanes = value*30;
+  //tesla.lanes = value*30;
   sliderCars(value);
   roundabout.setLanes(value);
   }

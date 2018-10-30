@@ -11,7 +11,7 @@ class Info {
     this.aiCars = cars;
   }
 
-  void draw(boolean active) {
+/*  void draw(boolean active) {
     if (!active) return;
     line = 0;
 
@@ -25,7 +25,7 @@ class Info {
       printText("Speed: " + car.speed);
       printText("In range from sensor: " + testCar.sensor(car, new PVector(300, 300) ));
     }
-  }
+  }*/
 
   void printText(String str) {
     text(str, position.x, position.y+line*spacing);

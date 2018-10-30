@@ -7,8 +7,8 @@ maintainer: Tokunaga Oscar oscar.tokunaga@cinvestav.com
 class Vehicle extends Thread{
   boolean DEBUG = false;
   PImage vImage;
-  int time = 0, lanes, targetIdx = 0, lastIdx;
-  float v = 1.0f, Kp = 1.0, k = 0.1, targetSpeed = 0,
+  int time = millis(), lanes, targetIdx = 0, lastIdx;
+  float v = 0f, Kp = 1.0, k = 0.1, targetSpeed = 0,
         L = 3f, max_steer = radians(30.0);
   PVector pose = new PVector();
   Utils utils = new Utils();
@@ -25,8 +25,8 @@ class Vehicle extends Thread{
     this.lastIdx = spline.get(0).size();
   } 
   
-  public void draw() {   
-    init();
+  public void draw() {  
+    //init();
     pushMatrix();
     translate(this.pose.x, this.pose.y);
     rotate(this.pose.z);
@@ -46,9 +46,15 @@ class Vehicle extends Thread{
     this.targetIdx = (int)sc[1];
     updateState(ai,sc[0]);
   }
+  
+  void updateStateAgents(){
+  
+  }
   void updateState(float accel, float delta){
-    utils.clip_(delta, -max_steer, max_steer);
-    double dt = 0.001;//clk() / 1000; 
+    myDelay(100);
+    delta = utils.clip_(delta, -max_steer, max_steer);
+    float dt = clk() / 1000; 
+    println(this.time);
     //println(clk());
     this.pose.x += this.v * cos(this.pose.z) * dt;
     this.pose.y += this.v * sin(this.pose.z) * dt;
@@ -154,7 +160,6 @@ class Vehicle extends Thread{
       }
       i++;
     }
-    println(output);
     return output;
   }
   
@@ -177,7 +182,7 @@ class Vehicle extends Thread{
     PVector globalPose = distanceToCenter();
     float curveLength = fPos.z - globalPose.z;
     curveLength = (curveLength <= 0) ? TWO_PI + curveLength : curveLength;
-    println(degrees(fPos.z), degrees(globalPose.z), degrees(curveLength));
+    //println(degrees(fPos.z), degrees(globalPose.z), degrees(curveLength));
     for(float i = globalPose.z + PI/6; i < globalPose.z + curveLength - PI/18; i += PI/18){
       x_list.add(x_list.size() - 2, (165 + 30 * lane) * cos(i));
       y_list.add(y_list.size() - 2, (165 + 30 * lane) * sin(i));
@@ -205,6 +210,12 @@ class Vehicle extends Thread{
     angle = (angle < 0) ? angle + TWO_PI : angle;
     return new PVector (d2center, d2center, angle);
   }
+  
+  void myDelay(int ms){
+      int time = millis();
+      while(millis() - time < ms);
+    }
+
   public void run(){
     while(true){
       init();

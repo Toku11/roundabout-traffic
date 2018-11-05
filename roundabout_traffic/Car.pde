@@ -274,7 +274,7 @@ public class Car extends Thread{
     float new_x = point.x * cos(this.angle + offset) - point.y * sin(this.angle + offset) + this.position.x;
     float new_y = point.x * sin(this.angle + offset) + point.y * cos(this.angle + offset) - this.position.y;
 
-    return new PVector(new_x,new_y); 
+    return new PVector(new_x, new_y); 
   }
   
   public int sensor(Car car, PVector vector) {

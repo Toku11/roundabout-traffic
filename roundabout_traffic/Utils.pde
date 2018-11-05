@@ -26,21 +26,21 @@ public class Utils {
   }
 
   public boolean isRed(PVector point) {
-    float col = get((int)point.x + 500, (int)point.y + 500) >> 16 & 0xFF;
-    float col2 = get((int)point.x + 500, (int)point.y + 500) & 0xFF;
+    float col = get((int)point.x + 500, 500 - ((int)point.y)) >> 16 & 0xFF;
+    float col2 = get((int)point.x + 500, 500 - ((int)point.y)) & 0xFF;
     if (col != col2) return true;
     return false;
   }
 
   public boolean isBlocked(ArrayList<PVector> sensors, char side) {
-    for (PVector sensor : sensors) {
-      if (sensor.x < 7.0 && side=='r' && inRange(sensor.y, 45, 135)) {
+    for (PVector sensor : sensors) { //x : distance last point, y : angle
+      if (sensor.x < 7.0 && side=='l' && inRange(sensor.y, 45, 135)) {
         return true;
       }
-      if (sensor.x < 7.0 && side=='l' && inRange(sensor.y, 225, 315)) {
+      if (sensor.x < 7.0 && side=='r' && inRange(sensor.y, 225, 315)) {
         return true;
       }
-      if (sensor.x < 7.0 && side=='f' && (inRange(sensor.y, 0, 25)||inRange(sensor.y, 345, 360))) {
+      if (sensor.x < 7.0 && side=='f' && (inRange(sensor.y, 0, 45)||inRange(sensor.y, 325, 360))) {
         return true;
       }
     }

@@ -7,13 +7,15 @@ maintainer: Tokunaga Oscar oscar.tokunaga@cinvestav.com
 class Vehicle extends Thread{
   boolean DEBUG = false;
   PImage vImage;
-  int time = millis(), lanes, targetIdx = 0, lastIdx;
-  float v = 0f, Kp = 1.0, k = 0.1, targetSpeed = 0,
-        L = 3f, max_steer = radians(30.0);
+  int time = millis(), lanes, targetIdx = 0, lastIdx = 0;
+  float v = 1.0f, Kp = 1.0, k = 0.01, targetSpeed = 0,
+        L = 30f, max_steer = radians(30.0);
   PVector pose = new PVector();
   Utils utils = new Utils();
   CubicSplinePlanner csp = new CubicSplinePlanner();
   ArrayList<ArrayList<Float>> spline;
+  ArrayList<PVector> sensorRange = new ArrayList();
+  
   
   Vehicle(float vel, int lanes){
     this.targetSpeed = vel;
@@ -21,12 +23,11 @@ class Vehicle extends Thread{
     vImage = loadImage("red.png");
     vImage.resize(50,20);
     imageMode(CENTER);
-    this.spline = createSpline(randInOut(),2);
+    this.spline = createSpline(randInOut(),1);
     this.lastIdx = spline.get(0).size();
   } 
   
   public void draw() {  
-    //init();
     pushMatrix();
     translate(this.pose.x, this.pose.y);
     rotate(this.pose.z);
@@ -41,21 +42,17 @@ class Vehicle extends Thread{
     return output;
   }
   void init(){
+    avoidFrontalCrash();
     float ai = pControl(this.targetSpeed, this.v);
     float[] sc = stanleyControl(this.spline, this.targetIdx);
     this.targetIdx = (int)sc[1];
     updateState(ai,sc[0]);
   }
   
-  void updateStateAgents(){
-  
-  }
+
   void updateState(float accel, float delta){
-    myDelay(100);
     delta = utils.clip_(delta, -max_steer, max_steer);
     float dt = clk() / 1000; 
-    println(this.time);
-    //println(clk());
     this.pose.x += this.v * cos(this.pose.z) * dt;
     this.pose.y += this.v * sin(this.pose.z) * dt;
     this.pose.z += this.v / L * tan(delta) * dt;
@@ -68,7 +65,7 @@ class Vehicle extends Thread{
     return this.time;
   }
   float pControl(float target, float current){
-    return Kp * (target - current);
+    return (target - current);//*Kp;
   }
   
   float[] stanleyControl(ArrayList<ArrayList<Float>> cs, int lastIdx){
@@ -215,7 +212,78 @@ class Vehicle extends Thread{
       int time = millis();
       while(millis() - time < ms);
     }
+    
+  private void speedUp(){
+    if (targetSpeed <= 2){
+      targetSpeed += 0.2;
+      //println("UP: "+ targetSpeed);
+    }
+  }
+  
+  private void speedDown(){
+    if(targetSpeed > 0.2){
+      targetSpeed -= 0.2;
+      //println("DOWN: "+ targetSpeed);
+    }
+  }
+  
+  public void getSensorReadings(int numSensors){ 
+    ArrayList<PVector> arm = makeSensor();
+    ArrayList<PVector> range = new ArrayList<PVector>();
+    
+    for(int i = 0; i < 360; i = i + 360 / numSensors){
+      int distance = getSensorDistance(arm,radians(i));
+      range.add(new PVector(distance, i));      
+    }
+    this.sensorRange = range;
+  }
 
+  private ArrayList makeSensor(){  
+    int spread = 3;
+    int armLength = 20;
+    ArrayList<PVector> points = new ArrayList<PVector>();
+
+    for(int i = 1; i <= armLength; i++){
+      points.add(new PVector(26 + (spread * i), 0));
+    }
+    return points;
+  }
+  
+  private int getSensorDistance(ArrayList<PVector> points, float offset){    
+    int i = 0;
+   
+    for (PVector point:points){
+      i++;
+      PVector rotatedPoint = getRotatedPoint(point, offset);
+
+      if (utils.isRed(rotatedPoint))
+      {
+        return i;
+      }
+      
+      if (DEBUG){
+        ellipse(rotatedPoint.x,rotatedPoint.y,1,1);
+      }
+      
+    }
+   return i;
+  }
+     
+  private PVector getRotatedPoint(PVector point, float offset){
+    float new_x = point.x * cos(this.pose.z + offset) + point.y * sin(this.pose.z + offset) + this.pose.x;
+    float new_y = point.x * sin(this.pose.z + offset) + point.y * cos(this.pose.z + offset) + this.pose.y;
+
+    return new PVector(new_x,new_y); 
+  }
+  
+  public void avoidFrontalCrash(){
+     // print(this.sensorRange.get(0).x,'f');
+      if (utils.isBlocked(this.sensorRange,'f')) 
+        speedDown();
+      else
+        speedUp();
+  }
+  
   public void run(){
     while(true){
       init();

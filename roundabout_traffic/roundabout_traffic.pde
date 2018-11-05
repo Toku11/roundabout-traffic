@@ -27,7 +27,6 @@ void setup() {
   //info = new Info(new PVector(10, 20), tesla, cars);
   //sensor  = new Sensor(tesla,cars);
   initGUI();
-  vehicle = new Vehicle(2,4);
 
   //surface.setVisible(false);
 }
@@ -47,15 +46,22 @@ void draw() {
   translate(offset.x, -offset.y);
 
 
-  roundabout.draw();   
   //vehicle.draw();
   for(int i = 0; i < vehicles.size(); i++){
-    if(vehicles.get(i).lastIdx - 10 <= vehicles.get(i).targetIdx){
+    if(vehicles.get(i).lastIdx-1 <= vehicles.get(i).targetIdx){
+      println(vehicles + " removed"+ vehicles.get(i));
       vehicles.remove(i); 
     }
-    else 
+    else{ 
+    vehicles.get(i).init();
     vehicles.get(i).draw();
+    }
   }
+  for(int i = 0; i < vehicles.size(); i++){
+      vehicles.get(i).getSensorReadings(8);
+  }
+  checkTraffic();
+  roundabout.draw();   
   /*tesla.getSensorReadings(36); 
   tesla.draw();
  // println(tesla.timeLap, ' ', tesla.speed,' ', tesla.time2);
@@ -97,9 +103,9 @@ void initGUI() {
   cp5.addSlider("sliderCars")
     .setPosition(10, height-60)
     .setWidth(100)
-    .setRange(1, 20)
+    .setRange(1, 6)
     .setValue(5)
-    .setNumberOfTickMarks(5)
+    .setNumberOfTickMarks(6)
     .setSliderMode(Slider.FLEXIBLE);
     
 
@@ -120,25 +126,24 @@ void sliderCars(int value) {
 
 void addRandomCars(int n) {
   
-  //cars.clear();
   vehicles.clear();
 
   for (int j=0; j < n; j++) {
     Vehicle v = new Vehicle(1,(int)random(1,5));
-    loadThread = new Thread(v);
-    loadThread.start();
+    //loadThread = new Thread(v);
+    //loadThread.start();
     vehicles.add(v);
-  /*  
-    Car c = new Car("red.png", setLane(), int(random(10, 20)), numLanes);
-    c.setColor(color(#BDFCED));//(int)random(100, 255));
-    cars.add(c);*/
   }
   
 }
-  
+
+void checkTraffic(){
+  if(vehicles.size() < 4){
+    vehicles.add(new Vehicle(1,(int)random(1,5)));
+  }
+}
 void sliderLanes(int value){
   numLanes = value;
-  //tesla.lanes = value*30;
   sliderCars(value);
   roundabout.setLanes(value);
   }

@@ -1,18 +1,17 @@
 import controlP5.*;
 Thread loadThread;
 
+Vehicle vehicle;
 ControlP5 cp5;
 Roundabout roundabout;
-//Info info;
+Info info;
 Sensor sensor;
 Utils utils = new Utils();
 PVector offset;
-//ArrayList<Car> cars;
 ArrayList<Vehicle> vehicles;
-int numLanes, i=0;
-boolean showInfo;
-boolean onlySimulation;
-Vehicle vehicle;
+int numLanes, i=0, numCars;
+boolean showInfo, debug;
+
 
 void setup() {
 
@@ -23,9 +22,7 @@ void setup() {
   offset = new PVector(width/2, height/2);
   roundabout = new Roundabout();
   vehicles = new ArrayList();
-
-  //info = new Info(new PVector(10, 20), tesla, cars);
-  //sensor  = new Sensor(tesla,cars);
+  info = new Info(new PVector(10,20), vehicles);
   initGUI();
 
   //surface.setVisible(false);
@@ -38,14 +35,13 @@ void draw() {
   translate(offset.x, -offset.y);
 
   ArrayList<Vehicle> toRemove = new ArrayList();
-
+  roundabout.draw();
   for (Vehicle v : vehicles) {
-    if (v.lastIdx-10 <= v.targetIdx) {
-      println(vehicles + " removed"+v);
+    if (v.lastIdx - 1 <= v.targetIdx) {
       toRemove.add(v);
     } else { 
-      //vehicles.get(i).init();
       v.draw();
+      v.DEBUG = debug;
     }
   }
 
@@ -54,21 +50,16 @@ void draw() {
   }
 
   for (Vehicle v : vehicles) {
-    v.getSensorReadings(8);
+    v.getSensorReadings(16);
   }
 
   checkTraffic();
-  roundabout.draw();
+
   popMatrix();
 
 
-  // info.draw(showInfo);
+  info.draw(showInfo);
   text("Framerate: "+frameRate, 10, height-10);
-}
-
-void stop() {
-  //tesla.stop = true;
-  super.stop();
 }
 
 void setEnvironment() {
@@ -88,24 +79,27 @@ void initGUI() {
   cp5.addSlider("sliderCars")
     .setPosition(10, height-60)
     .setWidth(100)
-    .setRange(1, 6)
+    .setRange(1, 20)
     .setValue(5)
-    .setNumberOfTickMarks(6)
+    .setNumberOfTickMarks(5)
     .setSliderMode(Slider.FLEXIBLE);
 
 
-  /*  cp5.addToggle("showInfo")
+  cp5.addToggle("showInfo")
    .setPosition(10, height-100)
    .setSize(20, 20)
-   .setValue(true);*/
+   .setValue(true);
 
-  cp5.addToggle("onlySimulation")
+  cp5.addToggle("debug")
     .setPosition(80, height-100)
     .setSize(20, 20)
     .setValue(false);
 }
-
+void debug(boolean value){
+  debug = value;
+}
 void sliderCars(int value) {
+  numCars = value;
   if (vehicles.size() != value) addRandomCars(value);
 }
 
@@ -114,17 +108,14 @@ void addRandomCars(int n) {
   vehicles.clear();
 
   for (int j=0; j < n; j++) {
-    Vehicle v = new Vehicle(1, (int)random(1, 5));
-    //loadThread = new Thread(v);
-    //loadThread.start();
-    vehicles.add(v);
+    addVehicle();
   }
 }
 
 void checkTraffic() {
-  if (vehicles.size() < 4) {
+  if (vehicles.size() < numCars) {
     try {
-      vehicles.add(new Vehicle((int)random(0,4), (int)random(1, 5)));
+      addVehicle();
     }
     catch(Exception e) {
       e.printStackTrace();
@@ -138,9 +129,15 @@ void sliderLanes(int value) {
 }
 
 void mouseClicked() {
-  vehicles.add(new Vehicle((int)random(0,4), (int)random(1, 5)));
+  addVehicle();
 }
 
+void addVehicle(){
+    Vehicle v = new Vehicle(100, (int)random(0, numLanes));
+    //loadThread = new Thread(v);
+    //loadThread.start();
+    vehicles.add(v);
+}
 PVector setLane() {
   int a = (int)random(0, numLanes);
   return new PVector(30*a+165, 30*a+165);

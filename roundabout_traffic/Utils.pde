@@ -34,13 +34,13 @@ public class Utils {
 
   public boolean isBlocked(ArrayList<PVector> sensors, char side) {
     for (PVector sensor : sensors) { //x : distance last point, y : angle
-      if (sensor.x < 7.0 && side=='l' && inRange(sensor.y, 45, 135)) {
+      if (sensor.x < 10.0 && side=='l' && inRange(sensor.y, 45, 135)) {
         return true;
       }
-      if (sensor.x < 7.0 && side=='r' && inRange(sensor.y, 225, 315)) {
+      if (sensor.x < 10.0 && side=='r' && inRange(sensor.y, 225, 315)) {
         return true;
       }
-      if (sensor.x < 7.0 && side=='f' && (inRange(sensor.y, 0, 45)||inRange(sensor.y, 325, 360))) {
+      if (sensor.x < 10.0 && side=='f' && (inRange(sensor.y, 0, 45)||inRange(sensor.y, 315, 360))) {
         return true;
       }
     }

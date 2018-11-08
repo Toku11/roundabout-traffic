@@ -4,13 +4,14 @@ This code is a Java implementation of the code de Atsushi Sakai
  maintainer: Tokunaga Oscar oscar.tokunaga@cinvestav.com
  */
 
-class Vehicle {//extends Thread {
+class Vehicle{// extends Thread {
 
-  boolean DEBUG = true;
+  boolean DEBUG = false;
+  color vColor;
   PImage vImage;
   int time = millis(), lanes, targetIdx = 0, lastIdx = 0;
-  float v = 1.0f, Kp = 1.0, k = 0.01, targetSpeed = 0, 
-    L = 30f, max_steer = radians(30.0);
+  float v = 1.0f, Kp = 3.0, k = 0.01, targetSpeed = 0, 
+    L = 50f, max_steer = radians(30.0);
   PVector pose = new PVector();
   Utils utils = new Utils();
   CubicSplinePlanner csp = new CubicSplinePlanner();
@@ -23,6 +24,7 @@ class Vehicle {//extends Thread {
     this.lanes = lanes;
     vImage = loadImage("red.png");
     vImage.resize(50, 20);
+    vColor = color(random(100, 255),random(100, 255),random(100, 255));
     imageMode(CENTER);
     this.spline = createSpline(randInOut(), lanes);
     this.lastIdx = spline.get(0).size();
@@ -31,6 +33,7 @@ class Vehicle {//extends Thread {
   public void draw() {
     try {
       init();
+      tint(vColor);
       pushMatrix();
       translate(this.pose.x, this.pose.y);
       rotate(this.pose.z);
@@ -45,7 +48,7 @@ class Vehicle {//extends Thread {
   }
 
   int[] randInOut() {
-    int[] output = new int[]{(int)random(1, 4), (int)random(1, 4)};
+    int[] output = new int[]{(int)random(1, 5), (int)random(1, 5)};
     return output;
   }
 
@@ -60,8 +63,7 @@ class Vehicle {//extends Thread {
 
   void updateState(float accel, float delta) {
     delta = utils.clip_(delta, -max_steer, max_steer);
-    float dt = constrain(clk() / 1000.0, 0.0, 1.0);
-    println(dt);
+    float dt = clk() / 1000.0; //constrain(clk() / 1000.0, 0.0, 1.0);
     
     this.pose.x += this.v * cos(this.pose.z) * dt;
     this.pose.y += this.v * sin(this.pose.z) * dt;
@@ -70,12 +72,13 @@ class Vehicle {//extends Thread {
     this.v += accel * dt;
   }
 
-  int clk() {
-    this.time = millis() - this.time;
-    return this.time;
+  float clk() {
+    float dt = millis() - this.time;
+    this.time = millis();
+    return dt;
   }
   float pControl(float target, float current) {
-    return (target - current);//*Kp;
+    return (target - current) * Kp;
   }
 
   float[] stanleyControl(ArrayList<ArrayList<Float>> cs, int lastIdx) {
@@ -121,13 +124,13 @@ class Vehicle {//extends Thread {
       case 1:
         {
           x = 50;
-          y = -(200+ 30 * lanes);
+          y = -(300+ 30 * lanes);
           phi = atan2(-1, 0);
           break;
         }
       case 2:
         {
-          x = (200 + 30 * lanes);
+          x = (300 + 30 * lanes);
           y = 50;  
           phi = atan2(0, 1);
           break;
@@ -135,13 +138,13 @@ class Vehicle {//extends Thread {
       case 3:
         {
           x = -50;
-          y = (200 + 30 * lanes);
+          y = (300 + 30 * lanes);
           phi = atan2(1, 0 );
           break;
         }
       case 4:
         {
-          x = -(200 + 30 * lanes);
+          x = -(300 + 30 * lanes);
           y = -50;
           phi = atan2(0, -1);
           break;
@@ -150,7 +153,7 @@ class Vehicle {//extends Thread {
         {
           println("Not a valid Lane specified: setting to 0");
           x = 50;
-          y = -(180 + 30 * lanes);
+          y = -(300 + 30 * lanes);
           phi = atan2(-1, 0);
           break;
         }
@@ -163,7 +166,7 @@ class Vehicle {//extends Thread {
         output.add(pos);
         y = (inOut[i] % 2 == 0) ? 0 : pos.y;
         x = (inOut[i] % 2 != 0) ? 0 : pos.x;
-        output.add(0, new PVector(pos.x + x / 3, pos.y + y / 3, phi));
+        output.add(0, new PVector(pos.x + x / 2, pos.y + y / 2, phi));
       } else {//salida
         PVector pos = new PVector(x, y, phi);
         pos.y = (inOut[i] % 2 == 0) ? -pos.y : pos.y;
@@ -171,7 +174,7 @@ class Vehicle {//extends Thread {
         output.add(pos);
         y = (inOut[i] % 2 == 0) ? 0 : pos.y;
         x = (inOut[i] % 2 != 0) ? 0 : pos.x;
-        output.add(new PVector(pos.x + x / 3, pos.y + y / 3, phi));
+        output.add(new PVector(pos.x + x / 2, pos.y + y / 2, phi));
       }
       i++;
     }
@@ -199,8 +202,8 @@ class Vehicle {//extends Thread {
     curveLength = (curveLength <= 0) ? TWO_PI + curveLength : curveLength;
     //println(degrees(fPos.z), degrees(globalPose.z), degrees(curveLength));
     for (float i = globalPose.z + PI/6; i < globalPose.z + curveLength - PI/18; i += PI/18) {
-      x_list.add(x_list.size() - 2, (165 + 30 * lane) * cos(i));
-      y_list.add(y_list.size() - 2, (165 + 30 * lane) * sin(i));
+      x_list.add(x_list.size() - 2, (170 + 30 * lane) * cos(i));
+      y_list.add(y_list.size() - 2, (170 + 30 * lane) * sin(i));
     }
 
     float[] x = utils.arrayListToArray(x_list);
@@ -231,15 +234,15 @@ class Vehicle {//extends Thread {
   }
 
   private void speedUp() {
-    if (targetSpeed <= 2) {
-      targetSpeed += 0.2;
+    if (targetSpeed <= 100) {
+      targetSpeed += 10;
       //println("UP: "+ targetSpeed);
     }
   }
 
   private void speedDown() {
-    if (targetSpeed > 0.2) {
-      targetSpeed -= 0.2;
+    if (targetSpeed > 11) {
+      targetSpeed -= 10;
       //println("DOWN: "+ targetSpeed);
     }
   }
@@ -257,7 +260,7 @@ class Vehicle {//extends Thread {
 
   private ArrayList makeSensor() {  
     int spread = 3;
-    int armLength = 20;
+    int armLength = 15;
     ArrayList<PVector> points = new ArrayList<PVector>();
 
     for (int i = 1; i <= armLength; i++) {

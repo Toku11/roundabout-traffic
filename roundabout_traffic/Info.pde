@@ -1,34 +1,28 @@
 class Info {
   PVector position;
-  Car testCar;
-  ArrayList<Car> aiCars;
+  ArrayList<Vehicle> vehicles;
   
   int line, spacing = 14;
 
-  Info(PVector position, Car car, ArrayList<Car> cars) {
+  Info(PVector position, ArrayList<Vehicle> vehicles) {
     this.position = position;
-    this.testCar = car;
-    this.aiCars = cars;
+    this.vehicles = vehicles;
   }
 
-/*  void draw(boolean active) {
+  void draw(boolean active) {
     if (!active) return;
     line = 0;
 
-    printText("Distance to center: " + testCar.distanceToCenter().x);
-
-    for (Car car : cars) {
+    for (Vehicle vehicle : vehicles) {
+      printText("Speed: " + vehicle.v);
+      printText("Ref Speed: " + vehicle.targetSpeed);
+      printText("Yaw: " + vehicle.pose.z);
       line++;
-      PVector vec = testCar.distanceToCar(car);
-      printText("Distance: " + vec.x);
-      printText("Angle: " + vec.y*180/PI +"°");
-      printText("Speed: " + car.speed);
-      printText("In range from sensor: " + testCar.sensor(car, new PVector(300, 300) ));
     }
-  }*/
+  }
 
   void printText(String str) {
-    text(str, position.x, position.y+line*spacing);
+    text(str, position.x, position.y + line * spacing);
     line++;
   }
 }

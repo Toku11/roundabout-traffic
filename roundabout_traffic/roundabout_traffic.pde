@@ -5,7 +5,6 @@ Vehicle vehicle;
 ControlP5 cp5;
 Roundabout roundabout;
 Info info;
-Sensor sensor;
 Utils utils = new Utils();
 PVector offset;
 ArrayList<Vehicle> vehicles;

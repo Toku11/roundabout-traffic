@@ -71,7 +71,7 @@ void initGUI() {
     .setPosition(180, height-60)
     .setWidth(100)
     .setRange(1, 5)
-    .setValue(5)
+    .setValue(2)
     .setNumberOfTickMarks(5)
     .setSliderMode(Slider.FLEXIBLE);
 
@@ -79,7 +79,7 @@ void initGUI() {
     .setPosition(10, height-60)
     .setWidth(100)
     .setRange(1, 20)
-    .setValue(5)
+    .setValue(10)
     .setNumberOfTickMarks(5)
     .setSliderMode(Slider.FLEXIBLE);
 

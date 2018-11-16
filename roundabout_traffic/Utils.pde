@@ -3,6 +3,12 @@ public class Utils {
   Utils() {
   }
 
+  public int roundAngle(float angle){
+    if(inRange(abs(angle), 0, sin(QUARTER_PI)))
+      return 0;
+    else
+      return (int)(angle/abs(angle));
+  }
   public boolean isVelMin(float vel) {
     if (vel >= 20.0)  return true;
     else  return false;

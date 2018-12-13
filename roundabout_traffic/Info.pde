@@ -10,6 +10,7 @@ class Info {
   }
 
   void draw(boolean active) {
+    fill(255);
     if (!active) return;
     line = 0;
 

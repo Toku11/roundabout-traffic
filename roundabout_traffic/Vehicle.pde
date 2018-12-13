@@ -4,7 +4,7 @@ This code is a Java implementation of the code de Atsushi Sakai
  maintainer: Tokunaga Oscar oscar.tokunaga@cinvestav.com
  */
 
-class Vehicle{// extends Thread {
+class Vehicle extends Thread {
 
   boolean DEBUG = false;
   color vColor;
@@ -32,7 +32,7 @@ class Vehicle{// extends Thread {
 
   public void draw() {
     try {
-      init();
+      //init();
       tint(vColor);
       pushMatrix();
       translate(this.pose.x, this.pose.y);
@@ -64,12 +64,11 @@ class Vehicle{// extends Thread {
   void updateState(float accel, float delta) {
     delta = utils.clip_(delta, -max_steer, max_steer);
     float dt = clk() / 1000.0; //constrain(clk() / 1000.0, 0.0, 1.0);
-    
     this.pose.x += this.v * cos(this.pose.z) * dt;
     this.pose.y += this.v * sin(this.pose.z) * dt;
     this.pose.z += this.v / L * tan(delta) * dt;
     this.pose.z = utils.normalizeAngle(this.pose.z);
-    this.v += accel * dt;
+    this.v += accel;// * dt;
   }
 
   float clk() {
@@ -78,7 +77,7 @@ class Vehicle{// extends Thread {
     return dt;
   }
   float pControl(float target, float current) {
-    return (target - current) * Kp;
+    return (target - current);// * Kp;
   }
 
   float[] stanleyControl(ArrayList<ArrayList<Float>> cs, int lastIdx) {
@@ -202,8 +201,8 @@ class Vehicle{// extends Thread {
     curveLength = (curveLength <= 0) ? TWO_PI + curveLength : curveLength;
     //println(degrees(fPos.z), degrees(globalPose.z), degrees(curveLength));
     for (float i = globalPose.z + PI/6; i < globalPose.z + curveLength - PI/18; i += PI/18) {
-      x_list.add(x_list.size() - 2, (170 + 30 * lane) * cos(i));
-      y_list.add(y_list.size() - 2, (170 + 30 * lane) * sin(i));
+      x_list.add(x_list.size() - 2, (165 + 30 * lane) * cos(i));
+      y_list.add(y_list.size() - 2, (165 + 30 * lane) * sin(i));
     }
 
     float[] x = utils.arrayListToArray(x_list);
@@ -234,15 +233,15 @@ class Vehicle{// extends Thread {
   }
 
   private void speedUp() {
-    if (targetSpeed <= 100) {
+    if (targetSpeed <= 500) {
       targetSpeed += 10;
       //println("UP: "+ targetSpeed);
     }
   }
 
   private void speedDown() {
-    if (targetSpeed > 11) {
-      targetSpeed -= 10;
+    if (targetSpeed > 100) {
+      targetSpeed = 10;
       //println("DOWN: "+ targetSpeed);
     }
   }
@@ -276,7 +275,7 @@ class Vehicle{// extends Thread {
       i++;
       PVector rotatedPoint = getRotatedPoint(point, offset);
 
-      if (utils.isRed(rotatedPoint))
+      if (utils.isVehicle(rotatedPoint))
       {
         return i;
       }
@@ -305,6 +304,7 @@ class Vehicle{// extends Thread {
 
   public void run() {
     while (true) {
+      delay(10);
       init();
     }
   }

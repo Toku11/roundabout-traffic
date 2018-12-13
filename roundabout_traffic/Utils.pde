@@ -30,11 +30,20 @@ public class Utils {
     }
     return false;
   }
+  
+  public float euclideanDist(float x1, float y1, float x2, float y2){
+    return sqrt(pow((x2 - x1),2) + pow((y2 - y1),2));
+  }
 
-  public boolean isRed(PVector point) {
-    float col = get((int)point.x + 500, 500 - ((int)point.y)) >> 16 & 0xFF;
-    float col2 = get((int)point.x + 500, 500 - ((int)point.y)) & 0xFF;
-    if (col != col2) return true;
+  public boolean isVehicle(PVector point) {
+    //PImage detectPixels;
+    //detectPixels = get();
+    //detectPixels.loadPixels();
+   // print(detectPixels.pixels[0]);
+    float col = red(get((int)point.x + 500, 500 - ((int)point.y)));// &0xFF;
+    float col2 = blue(get((int)point.x + 500, 500 - ((int)point.y)));
+    float col3 = green(get((int)point.x + 500, 500 - ((int)point.y)));
+    if (col != col2 && col != col3) return true;
     return false;
   }
 

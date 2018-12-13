@@ -259,7 +259,7 @@ public class Car extends Thread{
       PVector rotatedPoint = getRotatedPoint(point, offset);
       
       if(utils.isOut(rotatedPoint)) return i;
-      else{ if (utils.isRed(rotatedPoint)) return i;}
+      else{ if (utils.isVehicle(rotatedPoint)) return i;}
       
       if (showSensor){
         ellipse(rotatedPoint.x,rotatedPoint.y,1,1);

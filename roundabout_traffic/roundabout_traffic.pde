@@ -28,7 +28,7 @@ void setup() {
 }
 
 void draw() {
-  background(0);
+  background(25,83,25);
   pushMatrix(); 
   scale(1, -1);
   translate(offset.x, -offset.y);
@@ -36,7 +36,8 @@ void draw() {
   ArrayList<Vehicle> toRemove = new ArrayList();
   roundabout.draw();
   for (Vehicle v : vehicles) {
-    if (v.lastIdx - 1 <= v.targetIdx) {
+    if (v.lastIdx - 1 <= v.targetIdx || 
+        utils.euclideanDist(v.pose.x,0,v.pose.y,0)>=1000) {
       toRemove.add(v);
     } else { 
       v.draw();
@@ -53,12 +54,12 @@ void draw() {
   }
 
   checkTraffic();
-
   popMatrix();
 
 
   info.draw(showInfo);
   text("Framerate: "+frameRate, 10, height-10);
+
 }
 
 void setEnvironment() {
@@ -80,7 +81,7 @@ void initGUI() {
     .setWidth(100)
     .setRange(1, 20)
     .setValue(10)
-    .setNumberOfTickMarks(5)
+    .setNumberOfTickMarks(20)
     .setSliderMode(Slider.FLEXIBLE);
 
 
@@ -112,6 +113,7 @@ void addRandomCars(int n) {
 }
 
 void checkTraffic() {
+  println(numCars);
   if (vehicles.size() < numCars) {
     try {
       addVehicle();
@@ -120,7 +122,7 @@ void checkTraffic() {
       e.printStackTrace();
     }
   }
-}
+}//mcpr 
 void sliderLanes(int value) {
   numLanes = value;
   sliderCars(value);
@@ -133,8 +135,8 @@ void mouseClicked() {
 
 void addVehicle(){
     Vehicle v = new Vehicle(100, (int)random(0, numLanes));
-    //loadThread = new Thread(v);
-    //loadThread.start();
+    loadThread = new Thread(v);
+    loadThread.start();
     vehicles.add(v);
 }
 PVector setLane() {

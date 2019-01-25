@@ -6,11 +6,11 @@ This code is a Java implementation of the code de Atsushi Sakai
 
 class Vehicle extends Thread {
 
-  boolean DEBUG = false;
+  boolean DEBUG = false, step = false;
   color vColor;
   PImage vImage;
   int time = millis(), lanes, targetIdx = 0, lastIdx = 0;
-  float v = 1.0f, Kp = 3.0, k = 0.01, targetSpeed = 0, 
+  float v = 1000.0f, Kp = 3.0, k = 0.01, targetSpeed = 0, 
     L = 50f, max_steer = radians(30.0);
   PVector pose = new PVector();
   Utils utils = new Utils();
@@ -28,19 +28,22 @@ class Vehicle extends Thread {
     imageMode(CENTER);
     this.spline = createSpline(randInOut(), lanes);
     this.lastIdx = spline.get(0).size();
+    //getSensorReadings(16);
   } 
 
   public void draw() {
     try {
       //init();
+      //step();
       tint(vColor);
       pushMatrix();
       translate(this.pose.x, this.pose.y);
       rotate(this.pose.z);
       image(vImage, 0, 0);  
       popMatrix();
-      if (DEBUG)
+      if (DEBUG){
         printSpline(this.spline);
+      }
     }
     catch(Exception e) {
       print(e);
@@ -52,18 +55,39 @@ class Vehicle extends Thread {
     return output;
   }
 
-  void init() {
+  void step() {
+    getSensorReadings(24);
     avoidFrontalCrash();
     float ai = pControl(this.targetSpeed, this.v);
     float[] sc = stanleyControl(this.spline, this.targetIdx);
     this.targetIdx = (int)sc[1];
     updateState(ai, sc[0]);
   }
+  
+  public void avoidFrontalCrash() {
+    // print(this.sensorRange.get(0).x,'f');
+    if (utils.isBlocked(this.sensorRange, 'f')) 
+      speedDown();
+    else
+      speedUp();
+  }
+  
+  float pControl(float target, float current) {
+    return (target - current);// * Kp;
+  }
 
-
+  float[] stanleyControl(ArrayList<ArrayList<Float>> cs, int lastIdx) {
+    float[] nearest = calcTargetIdx(cs);
+    nearest[0] = (lastIdx >= nearest[0]) ? lastIdx : nearest[0];
+    float thetaE = utils.normalizeAngle(cs.get(2).get((int)nearest[0]) - this.pose.z);
+    float thetaD = atan2(k * nearest[1], this.v);
+    float delta = thetaE + thetaD;
+    return new float[]{delta, nearest[0]};
+  }
+  
   void updateState(float accel, float delta) {
     delta = utils.clip_(delta, -max_steer, max_steer);
-    float dt = clk() / 1000.0; //constrain(clk() / 1000.0, 0.0, 1.0);
+    float dt = 0.01; //clk() / 1000.0; //constrain(clk() / 1000.0, 0.0, 1.0);
     this.pose.x += this.v * cos(this.pose.z) * dt;
     this.pose.y += this.v * sin(this.pose.z) * dt;
     this.pose.z += this.v / L * tan(delta) * dt;
@@ -76,20 +100,7 @@ class Vehicle extends Thread {
     this.time = millis();
     return dt;
   }
-  float pControl(float target, float current) {
-    return (target - current);// * Kp;
-  }
 
-  float[] stanleyControl(ArrayList<ArrayList<Float>> cs, int lastIdx) {
-
-    float[] nearest = calcTargetIdx(cs);
-    nearest[0] = (lastIdx >= nearest[0]) ? lastIdx : nearest[0];
-    float thetaE = utils.normalizeAngle(cs.get(2).get((int)nearest[0]) - this.pose.z);
-    float thetaD = atan2(k * nearest[1], this.v);
-    float delta = thetaE + thetaD;
-
-    return new float[]{delta, nearest[0]};
-  }
 
   float[] calcTargetIdx(ArrayList<ArrayList<Float>> cs) {
     float fx = this.pose.x + L * cos(this.pose.z);
@@ -163,9 +174,9 @@ class Vehicle extends Thread {
       if (i == 0) {//entrada
         PVector pos = new PVector(x, y, phi);
         output.add(pos);
-        y = (inOut[i] % 2 == 0) ? 0 : pos.y;
-        x = (inOut[i] % 2 != 0) ? 0 : pos.x;
-        output.add(0, new PVector(pos.x + x / 2, pos.y + y / 2, phi));
+        y = (inOut[i] % 2 == 0) ? 0 : (int)random(pos.y/2, pos.y*2);
+        x = (inOut[i] % 2 != 0) ? 0 : (int)random(pos.x/2, pos.x*2);
+        output.add(0, new PVector(pos.x + x , pos.y + y , phi));
       } else {//salida
         PVector pos = new PVector(x, y, phi);
         pos.y = (inOut[i] % 2 == 0) ? -pos.y : pos.y;
@@ -233,15 +244,15 @@ class Vehicle extends Thread {
   }
 
   private void speedUp() {
-    if (targetSpeed <= 500) {
+    if (targetSpeed <= 1100) {
       targetSpeed += 10;
       //println("UP: "+ targetSpeed);
     }
   }
 
   private void speedDown() {
-    if (targetSpeed > 100) {
-      targetSpeed = 10;
+    if (targetSpeed > 110) {
+      targetSpeed -= 100;
       //println("DOWN: "+ targetSpeed);
     }
   }
@@ -259,7 +270,7 @@ class Vehicle extends Thread {
 
   private ArrayList makeSensor() {  
     int spread = 3;
-    int armLength = 15;
+    int armLength = 20;
     ArrayList<PVector> points = new ArrayList<PVector>();
 
     for (int i = 1; i <= armLength; i++) {
@@ -294,18 +305,8 @@ class Vehicle extends Thread {
     return new PVector(new_x, new_y);
   }
 
-  public void avoidFrontalCrash() {
-    // print(this.sensorRange.get(0).x,'f');
-    if (utils.isBlocked(this.sensorRange, 'f')) 
-      speedDown();
-    else
-      speedUp();
-  }
 
   public void run() {
-    while (true) {
-      delay(10);
-      init();
-    }
+
   }
 }

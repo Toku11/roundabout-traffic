@@ -1,7 +1,10 @@
 import controlP5.*;
+import processing.net.*;
 Thread loadThread;
-
+Client c;
+String input;
 Vehicle vehicle;
+Vehicle agent;
 ControlP5 cp5;
 Roundabout roundabout;
 Info info;
@@ -9,60 +12,78 @@ Utils utils = new Utils();
 PVector offset;
 ArrayList<Vehicle> vehicles;
 int numLanes, i=0, numCars;
-boolean showInfo, debug;
-
+boolean showInfo, debug, restarted = true;
+int data[];
 
 void setup() {
-
+  c = new Client(this, "127.0.0.1", 65432);
   size(1000, 1000);
-  frameRate(100);
+  frameRate(1000);
   colorMode(RGB, 255);
   stroke(255, 255, 255);
   offset = new PVector(width/2, height/2);
   roundabout = new Roundabout();
   vehicles = new ArrayList();
-  info = new Info(new PVector(10,20), vehicles);
+  agent = new Vehicle((int)random(100,1000), (int)random(0, numLanes));
+  info = new Info(new PVector(10,20), vehicles, agent);
   initGUI();
-
   //surface.setVisible(false);
 }
 
 void draw() {
-  background(25,83,25);
-  pushMatrix(); 
-  scale(1, -1);
-  translate(offset.x, -offset.y);
-
-  ArrayList<Vehicle> toRemove = new ArrayList();
-  roundabout.draw();
-  for (Vehicle v : vehicles) {
-    if (v.lastIdx - 1 <= v.targetIdx || 
-        utils.euclideanDist(v.pose.x,0,v.pose.y,0)>=1000) {
-      toRemove.add(v);
-    } else { 
-      v.draw();
-      v.DEBUG = debug;
-    }
+  
+  if(restarted){
+    pushMatrix();
+    scale(1,-1);
+    translate(offset.x, -offset.y);
+    drawGame();
+    step();
+    agent.step();
+    agent.draw();
+    restarted = false;    
   }
 
-  for (Vehicle v : toRemove) {
-    vehicles.remove(v);
-  }
 
-  for (Vehicle v : vehicles) {
-    v.getSensorReadings(16);
-  }
+  if (c.available() > 0) { 
+        pushMatrix(); 
+        scale(1, -1);
+        translate(offset.x, -offset.y);
+        
+        drawGame(); // previous state
+        
+        /*input = c.readString(); 
+        input = input.substring(0,input.indexOf("\n"));  // Only up to the newline
+        data = int(split(input, ' '));  // Split values into an array
+        */
+        step();
+        //agent.draw();
+        //agent.step();
+        //for (Vehicle v : vehicles) {
+          //v.draw();
+          //v.getSensorReadings(16);
+        //} 
+        checkDensity();
+        checkTraffic();
+        popMatrix();
+        info.draw(showInfo);
+        text("Framerate: "+frameRate, 10, height-10);
+        print(frameRate + "\n");
+      }
+        //v.draw();
 
-  checkTraffic();
-  popMatrix();
 
-
-  info.draw(showInfo);
-  text("Framerate: "+frameRate, 10, height-10);
+  //for (Vehicle v : vehicles) {
+  //  v.getSensorReadings(16);
+  //}
 
 }
 
-void setEnvironment() {
+void drawGame(){
+  background(25,83,25);
+  roundabout.draw();
+  for (Vehicle v : vehicles) {
+    v.draw();
+  }
 }
 
 void initGUI() {
@@ -112,8 +133,20 @@ void addRandomCars(int n) {
   }
 }
 
+void checkDensity(){
+  ArrayList<Vehicle> toRemove = new ArrayList();
+  for (Vehicle v : vehicles) {
+    if (v.lastIdx - 1 <= v.targetIdx || 
+        utils.euclideanDist(v.pose.x, 0, v.pose.y, 0) >= 1000) {
+        toRemove.add(v);
+    } 
+  }
+  for (Vehicle v : toRemove) {
+    vehicles.remove(v);
+  }
+}
+
 void checkTraffic() {
-  println(numCars);
   if (vehicles.size() < numCars) {
     try {
       addVehicle();
@@ -122,21 +155,31 @@ void checkTraffic() {
       e.printStackTrace();
     }
   }
-}//mcpr 
+}
+
 void sliderLanes(int value) {
   numLanes = value;
   sliderCars(value);
   roundabout.setLanes(value);
 }
 
-void mouseClicked() {
-  addVehicle();
+void step() {
+ //for( int k = 0; k <= 1; k++){
+  for (Vehicle v : vehicles) {
+      v.step();
+      //v.getSensorReadings(16);
+    }
+ // }
+  for (PVector arm : vehicles.get(0).sensorRange){
+    c.write(arm.x + " " + arm.y + " ");
+  }
 }
 
 void addVehicle(){
-    Vehicle v = new Vehicle(100, (int)random(0, numLanes));
-    loadThread = new Thread(v);
-    loadThread.start();
+    Vehicle v = new Vehicle((int)random(100,1000), (int)random(0, numLanes));
+    v.DEBUG = debug;
+    //loadThread = new Thread(v);
+    //loadThread.start();
     vehicles.add(v);
 }
 PVector setLane() {

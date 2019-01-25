@@ -55,7 +55,7 @@ public class Utils {
       if (sensor.x < 10.0 && side=='r' && inRange(sensor.y, 225, 315)) {
         return true;
       }
-      if (sensor.x < 10.0 && side=='f' && (inRange(sensor.y, 0, 45)||inRange(sensor.y, 315, 360))) {
+      if (sensor.x < 10.0 && side=='f' && (inRange(sensor.y, 0, 25)||inRange(sensor.y, 335, 360))) {
         return true;
       }
     }

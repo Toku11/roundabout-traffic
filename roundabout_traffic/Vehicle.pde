@@ -11,19 +11,20 @@ class Vehicle extends Thread {
   PImage vImage;
   int time = millis(), lanes, targetIdx = 0, lastIdx = 0;
   float v = 1000.0f, Kp = 3.0, k = 0.01, targetSpeed = 0, 
-    L = 50f, max_steer = radians(30.0);
+    L = 45, max_steer = radians(30.0);
   PVector pose = new PVector();
   Utils utils = new Utils();
   CubicSplinePlanner csp = new CubicSplinePlanner();
   ArrayList<ArrayList<Float>> spline;
   ArrayList<PVector> sensorRange = new ArrayList();
+  
 
 
   Vehicle(float vel, int lanes) {
     this.targetSpeed = vel;
     this.lanes = lanes;
     vImage = loadImage("red.png");
-    vImage.resize(50, 20);
+    vImage.resize(45, 18);
     vColor = color(random(100, 255),random(100, 255),random(100, 255));
     imageMode(CENTER);
     this.spline = createSpline(randInOut(), lanes);
@@ -49,8 +50,10 @@ class Vehicle extends Thread {
       print(e);
     }
   }
+  
 
-  int[] randInOut() {
+ 
+ int[] randInOut() {
     int[] output = new int[]{(int)random(1, 5), (int)random(1, 5)};
     return output;
   }
@@ -87,7 +90,7 @@ class Vehicle extends Thread {
   
   void updateState(float accel, float delta) {
     delta = utils.clip_(delta, -max_steer, max_steer);
-    float dt = 0.01; //clk() / 1000.0; //constrain(clk() / 1000.0, 0.0, 1.0);
+    float dt = 0.001; //clk() / 1000.0; //constrain(clk() / 1000.0, 0.0, 1.0);
     this.pose.x += this.v * cos(this.pose.z) * dt;
     this.pose.y += this.v * sin(this.pose.z) * dt;
     this.pose.z += this.v / L * tan(delta) * dt;

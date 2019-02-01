@@ -6,7 +6,7 @@ class Roundabout{
   
   void draw(){
     noFill();
-
+    
     int diam = 300 + 60 * this.lanes;
     for (int j = 0; j <= this.lanes; j++){
         for(int i = 0; i < 4; i++){

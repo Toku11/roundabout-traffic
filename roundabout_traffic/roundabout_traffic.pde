@@ -1,10 +1,12 @@
 import controlP5.*;
 import processing.net.*;
+
 Thread loadThread;
-Client c;
+//Client c;
 String input;
 Vehicle vehicle;
 Vehicle agent;
+Agent agent2;
 ControlP5 cp5;
 Roundabout roundabout;
 Info info;
@@ -16,7 +18,7 @@ boolean showInfo, debug, restarted = true;
 int data[];
 
 void setup() {
-  c = new Client(this, "127.0.0.1", 65432);
+  //c = new Client(this, "127.0.0.1", 65432);
   size(1000, 1000);
   frameRate(1000);
   colorMode(RGB, 255);
@@ -25,14 +27,17 @@ void setup() {
   roundabout = new Roundabout();
   vehicles = new ArrayList();
   agent = new Vehicle((int)random(100,1000), (int)random(0, numLanes));
+  agent2 = new Agent(true);
   info = new Info(new PVector(10,20), vehicles, agent);
   initGUI();
+  agent2.start();
   //surface.setVisible(false);
 }
 
 void draw() {
   
   if(restarted){
+
     pushMatrix();
     scale(1,-1);
     translate(offset.x, -offset.y);
@@ -40,22 +45,24 @@ void draw() {
     step();
     agent.step();
     agent.draw();
-    restarted = false;    
+    restarted = false; 
+    popMatrix();
   }
 
 
-  if (c.available() > 0) { 
+  //if (c.available() > 0) { 
         pushMatrix(); 
         scale(1, -1);
         translate(offset.x, -offset.y);
         
         drawGame(); // previous state
-        
+        line(0,0,165,0);
         /*input = c.readString(); 
         input = input.substring(0,input.indexOf("\n"));  // Only up to the newline
         data = int(split(input, ' '));  // Split values into an array
         */
         step();
+        agent2.draw();
         //agent.draw();
         //agent.step();
         //for (Vehicle v : vehicles) {
@@ -67,8 +74,7 @@ void draw() {
         popMatrix();
         info.draw(showInfo);
         text("Framerate: "+frameRate, 10, height-10);
-        print(frameRate + "\n");
-      }
+    //  }
         //v.draw();
 
 
@@ -78,6 +84,15 @@ void draw() {
 
 }
 
+public void keyPressed(){
+  //print(keyCode);
+  agent2.keycode = keyCode;
+}
+
+public void keyReleased(){
+  //print("released");
+  //agent2.keycode = 0;
+}
 void drawGame(){
   background(25,83,25);
   roundabout.draw();
@@ -170,9 +185,9 @@ void step() {
       //v.getSensorReadings(16);
     }
  // }
-  for (PVector arm : vehicles.get(0).sensorRange){
-    c.write(arm.x + " " + arm.y + " ");
-  }
+  //for (PVector arm : vehicles.get(0).sensorRange){
+    //c.write(arm.x + " " + arm.y + " ");
+  //}
 }
 
 void addVehicle(){

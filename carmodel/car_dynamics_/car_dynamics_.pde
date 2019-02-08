@@ -1,9 +1,12 @@
 import controlP5.*;
 import processing.net.*;
 
-Agent agent2;
+Agent agent;
 ControlP5 cp5;
 PVector offset;
+boolean kUp, kDown, kLeft, kRight, kSpace, kESC;
+
+
 void setup() {
   //c = new Client(this, "127.0.0.1", 65432);
   size(1000, 1000);
@@ -12,8 +15,8 @@ void setup() {
   stroke(255, 255, 255);
   offset = new PVector(width/2, height/2);
   
-  agent2 = new Agent(true);
-  agent2.start();
+  agent = new Agent();
+  agent.start();
   //surface.setVisible(false);
 }
 
@@ -26,18 +29,33 @@ void draw() {
        
         line(0,0,165,0);
        
-        agent2.draw();
+        agent.draw();
 
         popMatrix();
-
+        agent.keycodes = new boolean[] {kUp, kDown, kLeft, kRight, kSpace, kESC};
+        //println(kUp, kDown, kLeft, kRight, kSpace, kESC);
 }
 
 public void keyPressed(){
-  //print(keyCode);
-  agent2.keycode = keyCode;
+    switch (keyCode)
+  {
+   case 38 : kUp = true; break;
+   case 40 : kDown = true; break;
+   case 37 : kLeft = true; break;
+   case 39 : kRight = true; break;
+   case 32 : kSpace = true; break;
+   case 27 : kESC = true; break;
+  }
 }
 
 public void keyReleased(){
-  //print("released");
-  //agent2.keycode = 0;
+  switch (keyCode)
+  {
+   case 38 : kUp = false; break;
+   case 40 : kDown = false; break;
+   case 37 : kLeft = false; break;
+   case 39 : kRight = false; break;
+   case 32 : kSpace = false; break;
+   case 27 : kESC = false; break;
+  }
 }

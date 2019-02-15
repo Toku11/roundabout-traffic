@@ -2,6 +2,7 @@ import controlP5.*;
 import processing.net.*;
 
 Agent agent;
+Info info;
 ControlP5 cp5;
 PVector offset;
 boolean kUp, kDown, kLeft, kRight, kSpace, kESC;
@@ -16,7 +17,8 @@ void setup() {
   offset = new PVector(width/2, height/2);
   
   agent = new Agent();
-  agent.start();
+  info = new Info(new PVector(10,20), agent);
+  //agent.start();
   //surface.setVisible(false);
 }
 
@@ -27,13 +29,13 @@ void draw() {
         scale(1, -1);
         translate(offset.x, -offset.y);
        
-        line(0,0,165,0);
+        //line(0,0,165,0);
        
         agent.draw();
 
         popMatrix();
         agent.keycodes = new boolean[] {kUp, kDown, kLeft, kRight, kSpace, kESC};
-        //println(kUp, kDown, kLeft, kRight, kSpace, kESC);
+        info.draw(true);
 }
 
 public void keyPressed(){

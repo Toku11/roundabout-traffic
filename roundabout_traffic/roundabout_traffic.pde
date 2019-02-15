@@ -6,7 +6,7 @@ Thread loadThread;
 String input;
 Vehicle vehicle;
 Vehicle agent;
-Agent agent2;
+//Agent agent2;
 ControlP5 cp5;
 Roundabout roundabout;
 Info info;
@@ -27,10 +27,10 @@ void setup() {
   roundabout = new Roundabout();
   vehicles = new ArrayList();
   agent = new Vehicle((int)random(100,1000), (int)random(0, numLanes));
-  agent2 = new Agent(true);
+ // agent2 = new Agent(true);
   info = new Info(new PVector(10,20), vehicles, agent);
   initGUI();
-  agent2.start();
+  //agent2.start();
   //surface.setVisible(false);
 }
 
@@ -62,7 +62,7 @@ void draw() {
         data = int(split(input, ' '));  // Split values into an array
         */
         step();
-        agent2.draw();
+        //agent2.draw();
         //agent.draw();
         //agent.step();
         //for (Vehicle v : vehicles) {
@@ -86,7 +86,7 @@ void draw() {
 
 public void keyPressed(){
   //print(keyCode);
-  agent2.keycode = keyCode;
+  //agent2.keycode = keyCode;
 }
 
 public void keyReleased(){

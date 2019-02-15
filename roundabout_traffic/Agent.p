@@ -1,4 +1,5 @@
-  
+ /* complex model but not implemented yet in the main loop*/
+
 class Agent implements Runnable{
   // Vehicle variables//////////////////////////////
   static final int TRAIL_SIZE = 200;     /* number of dots in car trail */

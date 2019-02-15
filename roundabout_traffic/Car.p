@@ -1,4 +1,5 @@
-/*Scale 10:1*/
+/*Scale 10:1*//*only kinematics, simple model*/
+
 public class Car extends Thread{
   PImage carImage;
   PVector position;

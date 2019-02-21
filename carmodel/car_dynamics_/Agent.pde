@@ -17,6 +17,7 @@ class Agent implements Runnable{
   PVector   acceleration_wc;
   PVector   acceleration;
   PVector   centerOfGravity;
+  float     airDrag;
   float     headingAngle;
   float     steerAngle;
   float     sn, cs;
@@ -51,7 +52,7 @@ class Agent implements Runnable{
       this.ebrake = val;
     }
     float getVelocityMagnitude(){
-     return sqrt(pow(this.Velocity.x, 2) + pow(this.Velocity.y, 2));
+     return Velocity.mag();
      }
    float getKilometersPerHour(){
      return getVelocityMagnitude() * 18.0 / 5.0;
@@ -131,8 +132,8 @@ class Agent implements Runnable{
     public void updateAutomaticTransmission(CAR car){
       float rpm = getRPM(car);
        lastRPM = rpm;
-      if(rpm > 3200){
-        if(getCurrentGear() < 5){
+      if(rpm > 1000){
+        if(getCurrentGear() < 6){
           setCurrentGear(getCurrentGear() + 1);
         }
       } else if (rpm < 2000){
@@ -162,7 +163,7 @@ class Agent implements Runnable{
     float totalTireGrip;
     float weight;
     float getAngularVelocity(){
-      return tireLeft.angularVelocity + tireRight.angularVelocity;
+      return (tireLeft.angularVelocity + tireRight.angularVelocity)/2;
     }
     
     float getTorque(){
@@ -362,8 +363,8 @@ void weightTires(){
  }
  
 
- static final float AIRDRAG         = 2.5;//5.0;     /* factor for air resistance (drag)         */
- static final float RESISTANCE      = 8.0;//;30.0;    /* factor for rolling resistance */
+ static final float AIRDRAG         = 0.5 * 0.30 * 2.2 * 1.29;//5.0;     /* factor for air resistance (drag)         */
+ static final float RESISTANCE      = 30 * AIRDRAG;//;30.0;    /* factor for rolling resistance */
  static final float CA_R            = 5.2;   /* cornering stiffness */
  static final float CA_F            = 5.0;    /* cornering stiffness */
  static final float MAX_GRIP        = 2.0;     /* maximum (normalised) friction force, =diameter of friction circle */
@@ -383,18 +384,20 @@ void weightTires(){
   velocity.y = -sn * velocity_wc.x + cs * velocity_wc.y;
   
   //Weight transfer
-  float transferX = WEIGHTTRANSFER * acceleration.x * car.cartype.h / car.cartype.wheelbase;
-  float transferY = WEIGHTTRANSFER * acceleration.y * car.cartype.h / car.cartype.width; 
+  float transferX = /*WEIGHTTRANSFER **/ acceleration.x * car.cartype.h / car.cartype.wheelbase;
+  float transferY = /*WEIGHTTRANSFER **/ (acceleration.y / -GRAVITY) * car.cartype.h / car.cartype.width; 
   
   // weight on each axle ratio is b / L
   float weightFront = car.cartype.mass * (car.cartype.axleFront.weightRatio * -GRAVITY - transferX);
   float weightRear  = car.cartype.mass * (car.cartype.axleRear.weightRatio * -GRAVITY + transferX);
   
+  float weightLatRear  = transferY * weightRear;
+  float weightLatFront = transferY * weightFront;
   // Weight on each tire 
-  car.cartype.axleFront.tireLeft.activeWeight  = weightFront - transferY;
-  car.cartype.axleFront.tireRight.activeWeight = weightFront + transferY;
-  car.cartype.axleRear.tireLeft.activeWeight   = weightRear - transferY;
-  car.cartype.axleRear.tireRight.activeWeight  = weightRear + transferY;
+  car.cartype.axleFront.tireLeft.activeWeight  = weightFront - weightLatFront;
+  car.cartype.axleFront.tireRight.activeWeight = weightFront + weightLatFront;
+  car.cartype.axleRear.tireLeft.activeWeight   = weightRear - weightLatRear;
+  car.cartype.axleRear.tireRight.activeWeight  = weightRear + weightLatRear;
   
  // Velocity of each tire
  car.cartype.axleFront.tireLeft.angularVelocity  = car.cartype.b * car.angularvelocity;
@@ -433,8 +436,8 @@ void weightTires(){
  float tractionForceX = car.cartype.axleRear.getTorque() - activeBrake * SGN(velocity.x);
  float tractionForceY = 0;
 
- float dragForceX = -RESISTANCE * velocity.x - AIRDRAG * velocity.x * abs(velocity.x);
- float dragForceY = -RESISTANCE * velocity.y - AIRDRAG * velocity.y * abs(velocity.y);
+ float dragForceX = -RESISTANCE * velocity.x - AIRDRAG * velocity.x * velocity.mag();
+ float dragForceY = -RESISTANCE * velocity.y - AIRDRAG * velocity.y * velocity.mag();
 
  float totalForceX = dragForceX + tractionForceX;
  float totalForceY = dragForceY + tractionForceY 

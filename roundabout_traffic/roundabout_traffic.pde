@@ -2,7 +2,7 @@ import controlP5.*;
 import processing.net.*;
 
 Thread loadThread;
-//Client c;
+Client c;
 String input;
 Vehicle vehicle;
 Vehicle agent;
@@ -18,7 +18,7 @@ boolean showInfo, debug, restarted = true;
 int data[];
 
 void setup() {
-  //c = new Client(this, "127.0.0.1", 65432);
+  c = new Client(this, "127.0.0.1", 65432);
   size(1000, 1000);
   frameRate(1000);
   colorMode(RGB, 255);
@@ -50,21 +50,20 @@ void draw() {
   }
 
 
-  //if (c.available() > 0) { 
+  if (c.available() > 0) { 
         pushMatrix(); 
         scale(1, -1);
         translate(offset.x, -offset.y);
         
         drawGame(); // previous state
         line(0,0,165,0);
-        /*input = c.readString(); 
+        input = c.readString(); 
         input = input.substring(0,input.indexOf("\n"));  // Only up to the newline
         data = int(split(input, ' '));  // Split values into an array
-        */
         step();
         //agent2.draw();
-        //agent.draw();
-        //agent.step();
+        agent.draw();
+        agent.step();
         //for (Vehicle v : vehicles) {
           //v.draw();
           //v.getSensorReadings(16);
@@ -74,7 +73,7 @@ void draw() {
         popMatrix();
         info.draw(showInfo);
         text("Framerate: "+frameRate, 10, height-10);
-    //  }
+      }
         //v.draw();
 
 
@@ -185,9 +184,9 @@ void step() {
       //v.getSensorReadings(16);
     }
  // }
-  //for (PVector arm : vehicles.get(0).sensorRange){
-    //c.write(arm.x + " " + arm.y + " ");
-  //}
+  for (PVector arm : vehicles.get(0).sensorRange){
+    c.write(arm.x + " " + arm.y + " ");
+  }
 }
 
 void addVehicle(){

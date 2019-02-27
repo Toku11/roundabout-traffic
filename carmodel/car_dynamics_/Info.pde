@@ -22,6 +22,8 @@ class Info {
     printText("TR slip " + agent.car.cartype.axleRear.slipAngle);
     printText("TF slip " + agent.car.cartype.axleFront.slipAngle);
     printText("Accel: " + agent.acceleration.x +"  " +agent.acceleration.y);
+    printText("velocity: "+ agent.velocity.x + " " + agent.velocity.y);
+   printText("velocity: "+ agent.car.Velocity.x + " " + agent.car.Velocity.y);
     line++;
     }
 

@@ -3,9 +3,9 @@
 //https://nccastaff.bournemouth.ac.uk/jmacey/MastersProjects/MSc12/Srisuchat/Thesis.pdf
 class Agent implements Runnable{
   // Vehicle variables//////////////////////////////
-  static final int TRAIL_SIZE = 200;     /* number of dots in car trail */
+  static final int TRAIL_SIZE = 100;     /* number of dots in car trail */
   static final float DELTA_T = 0.01;    /* time between integration steps in physics modelling */
-  
+  static final int SCALE = 10;
   CARTYPE []cartypes = new CARTYPE[1];
   TRAILPOINT [] trail = new TRAILPOINT [ TRAIL_SIZE ];
   
@@ -43,7 +43,10 @@ class Agent implements Runnable{
     float brake;           // amount of braking (input)
     float ebrake;
     void setThrottle(float val){
-      this.throttle = val;
+      if (val==1) {this.throttle = min(this.throttle + 0.1, 1);}
+      else if ( val==-1 && this.throttle >-1){this.throttle = max(this.throttle - 0.1, -1);}
+      else {this.throttle = 0;}
+   
     }
     void setBrake(float val){
       this.brake = val;
@@ -51,11 +54,12 @@ class Agent implements Runnable{
     void setEbrake(float val){
       this.ebrake = val;
     }
-    float getVelocityMagnitude(){
-     return Velocity.mag();
-     }
+
+   float getAngVel(){
+     return velocity.mag() ;/// car.cartype.axleRear.tireLeft.radius;
+   }
    float getKilometersPerHour(){
-     return getVelocityMagnitude() * 18.0 / 5.0;
+     return velocity.mag() * 18.0 / 5.0;
    }
 
   }
@@ -84,7 +88,7 @@ class Agent implements Runnable{
   {  
     public ENGINE(){
       gearRatios  = new float[]{5.8, 4.5, 3.74, 2.8, 1.6, 0.79, 4.2};
-      torqueCurve = new int[]{100, 280, 325, 420, 460, 340, 300, 100};
+      torqueCurve = new int[]{100, 280, 340, 420, 500, 350, 300, 100};
       currentGear = 0;
     }
     float[] gearRatios;
@@ -102,13 +106,13 @@ class Agent implements Runnable{
       return gearRatios[getCurrentGear()];
     }
     public float effectiveGearRatio(){
-      return gearRatios[gearRatios.length -1];
+      return gearRatios[gearRatios.length - 1];
     }
     public float getTorque(CAR car){  
       return getTorque(getRPM(car));
     }
     public float getRPM(CAR car){
-      return car.getVelocityMagnitude() / (PI * 2 / 60.0) * (gearRatio() * effectiveGearRatio());
+      return car.getAngVel() * (60.0 / PI * 2) * (gearRatio() * effectiveGearRatio());
     }
     public float getTorque(float rpm){
       if (rpm < 1000) {      
@@ -132,11 +136,11 @@ class Agent implements Runnable{
     public void updateAutomaticTransmission(CAR car){
       float rpm = getRPM(car);
        lastRPM = rpm;
-      if(rpm > 1000){
-        if(getCurrentGear() < 6){
+      if(rpm > 6200){
+        if(getCurrentGear() < 5){
           setCurrentGear(getCurrentGear() + 1);
         }
-      } else if (rpm < 2000){
+      } else if (rpm < 3000){
         if (getCurrentGear() > 0){
           setCurrentGear(getCurrentGear() - 1);
         }
@@ -152,8 +156,8 @@ class Agent implements Runnable{
     {
       tireLeft  = new TIRE();
       tireRight = new TIRE();
-      tireLeft.radius  = 0.5;
-      tireRight.radius = 0.5;
+      tireLeft.radius  = 0.3;
+      tireRight.radius = 0.3;
     }
     TIRE  tireLeft;
     TIRE  tireRight;
@@ -163,7 +167,7 @@ class Agent implements Runnable{
     float totalTireGrip;
     float weight;
     float getAngularVelocity(){
-      return (tireLeft.angularVelocity + tireRight.angularVelocity)/2;
+      return (tireLeft.angularVelocity + tireRight.angularVelocity);
     }
     
     float getTorque(){
@@ -225,7 +229,7 @@ class Agent implements Runnable{
   cartype.axleFront.weight           = cartype.mass * (cartype.axleFront.weightRatio * -GRAVITY);
   cartype.axleRear.weight            = cartype.mass * (cartype.axleRear.weightRatio * -GRAVITY);
   cartype.axleRear.tireLeft.rWeight  = cartype.axleRear.tireRight.rWeight = cartype.axleRear.weight;
-  cartype.axleFront.tireLeft.rWeight = cartype.axleFront.tireRight.rWeight = cartype.axleRear.weight;
+  cartype.axleFront.tireLeft.rWeight = cartype.axleFront.tireRight.rWeight = cartype.axleFront.weight;
  }
 
  void init_car( CAR car, CARTYPE cartype )
@@ -273,11 +277,11 @@ class Agent implements Runnable{
     try {
      handleKeyEvent(this.car);
      do_physics(this.car, engine);
-     add_to_trail( position_wc.x, position_wc.y, headingAngle );
+     add_to_trail( position_wc.x*SCALE, position_wc.y*SCALE, headingAngle );
      
       tint(vColor);
       pushMatrix();
-      translate(position_wc.x, position_wc.y);
+      translate(position_wc.x*SCALE, position_wc.y*SCALE);
       draw_trail();
       
       rotate(headingAngle);
@@ -298,16 +302,15 @@ class Agent implements Runnable{
  static final float STEERADJUSTSPEED     = 1.0;
  
  public void handleKeyEvent(CAR car)
-  {   
-   car.setThrottle(0);
-   car.setBrake(0);
-   car.setEbrake(0);
+  {
    steerInput   = 0;
-   if (keycodes[5] == true) {System.exit(0);}
-   if( keycodes[0] == true)  {car.setThrottle(1);}
-     else if( keycodes[1] == true ){car.setThrottle(-1);}
-   if( keycodes[4] == true ) {car.setEbrake(1);}
-   if( keycodes[2] == true ){steerInput = 1;} 
+   if( keycodes[0] == false && keycodes[1] == false)  {car.setThrottle(0);}
+   if( keycodes[4] == false)       {car.setEbrake(0);}
+   if (keycodes[5] == true)        {System.exit(0);}
+   if( keycodes[0] == true)        {car.setThrottle(1);}
+     else if( keycodes[1] == true )  {car.setThrottle(-1);}
+   if( keycodes[4] == true )       {car.setEbrake(1);}
+   if( keycodes[2] == true )       {steerInput = 1;} 
      else if( keycodes[3] == true ){steerInput = -1;}
    keycodes = new boolean[] {false, false, false, false, false, false};
    steerDirection = smoothSteering(steerInput);
@@ -407,9 +410,9 @@ void weightTires(){
  
  // Slip angle
  car.cartype.axleFront.slipAngle = atan2((velocity.y + car.cartype.axleFront.getAngularVelocity())
-                                   ,(abs(velocity.x))) - SGN(velocity.x) * steerAngle;
+                                   ,abs(velocity.x)) - SGN(velocity.x)* steerAngle;
  car.cartype.axleRear.slipAngle = atan2((velocity.y + car.cartype.axleRear.getAngularVelocity())
-                                   ,(abs(velocity.x)));
+                                   ,abs(velocity.x));
  
  float activeBrake    = min(car.brake * car.cartype.brakepower 
                         + car.ebrake * car.cartype.ebrakepower, car.cartype.brakepower);
@@ -436,10 +439,11 @@ void weightTires(){
  float tractionForceX = car.cartype.axleRear.getTorque() - activeBrake * SGN(velocity.x);
  float tractionForceY = 0;
 
- float dragForceX = -RESISTANCE * velocity.x - AIRDRAG * velocity.x * velocity.mag();
- float dragForceY = -RESISTANCE * velocity.y - AIRDRAG * velocity.y * velocity.mag();
+ float dragForceX = -RESISTANCE * velocity.x - AIRDRAG * velocity.x * abs(velocity.x);
+ float dragForceY = -RESISTANCE * velocity.y - AIRDRAG * velocity.y * abs(velocity.y);
 
  float totalForceX = dragForceX + tractionForceX;
+      // + sin(steerAngle) * car.cartype.axleFront.getFrictionForce() + car.cartype.axleRear.getFrictionForce();
  float totalForceY = dragForceY + tractionForceY 
        + cos (steerAngle) * car.cartype.axleFront.getFrictionForce() + car.cartype.axleRear.getFrictionForce();
 
@@ -450,9 +454,13 @@ void weightTires(){
  
  // If we are not pressing gas, add artificial drag - helps with simulation stability
  if (car.throttle == 0) {
-   velocity = PVector.lerp (velocity, new PVector(0.0, 0.0), 0.005f);
- }
+   velocity_wc = PVector.lerp (velocity_wc, new PVector(0.0, 0.0), 0.005f);
+  }
     
+  // Angular torque of car
+ float angularTorque = (car.cartype.axleFront.getFrictionForce() * car.cartype.b) 
+                     - (car.cartype.axleRear.getFrictionForce() * car.cartype.c);
+  float angularAcceleration = angularTorque / car.cartype.inertia;                    
  // Acceleration
  acceleration.x = totalForceX / car.cartype.mass;
  acceleration.y = totalForceY / car.cartype.mass;
@@ -463,12 +471,13 @@ void weightTires(){
  // Velocity and speed
  velocity_wc.x += acceleration_wc.x * DELTA_T;
  velocity_wc.y += acceleration_wc.y * DELTA_T;
-
+ 
+ position_wc.x += DELTA_T * velocity_wc.x;
+ position_wc.y += DELTA_T * velocity_wc.y;
+ 
  absoluteVelocity = velocity_wc.mag();
  
- // Angular torque of car
- float angularTorque = (car.cartype.axleFront.getFrictionForce() * car.cartype.b) 
-                     - (car.cartype.axleRear.getFrictionForce() * car.cartype.c);
+
                      
  // Car will drift away at low speeds
  if (absoluteVelocity < 0.5f && activeThrottle == 0)
@@ -481,7 +490,7 @@ void weightTires(){
       acceleration_wc = new PVector(0,0,0);
  }
  
- float angularAcceleration = angularTorque / car.cartype.inertia;
+
  
  // Update 
  car.angularvelocity += angularAcceleration * DELTA_T;
@@ -494,12 +503,11 @@ void weightTires(){
    }
 
  headingAngle += car.angularvelocity * DELTA_T;
- position_wc.x += DELTA_T * velocity_wc.x;
- position_wc.y += DELTA_T * velocity_wc.y;
- car.cartype.axleRear.tireLeft.pose   = new PVector(-20,9,0);//.rotate(headingAngle).add(position_wc);
- car.cartype.axleRear.tireRight.pose  = new PVector(-20,-9,0);//.rotate(headingAngle).add(position_wc);
- car.cartype.axleFront.tireLeft.pose  = new PVector(20,9,0);//.rotate(headingAngle).add(position_wc);
- car.cartype.axleFront.tireRight.pose = new PVector(20,-9,0);//.rotate(headingAngle).add(position_wc);
+
+ car.cartype.axleRear.tireLeft.pose   = new PVector(-2*SCALE,0.9*SCALE,0);//.rotate(headingAngle).add(position_wc);
+ car.cartype.axleRear.tireRight.pose  = new PVector(-2*SCALE,-0.9*SCALE,0);//.rotate(headingAngle).add(position_wc);
+ car.cartype.axleFront.tireLeft.pose  = new PVector(2*SCALE,0.9*SCALE,0);//.rotate(headingAngle).add(position_wc);
+ car.cartype.axleFront.tireRight.pose = new PVector(2*SCALE,-0.9*SCALE,0);//.rotate(headingAngle).add(position_wc);
  car.Velocity = velocity_wc;
  }
 
@@ -512,8 +520,8 @@ void draw_trail()
     int i, x, y;
     for( i = 0; i < num_trail; i++)
     {
-      x = (int) ((trail[i].x - position_wc.x) );
-      y = (int) ((trail[i].y - position_wc.y) );
+      x = (int) ((trail[i].x - position_wc.x * SCALE) );
+      y = (int) ((trail[i].y - position_wc.y * SCALE) );
       point(x,y);
     }
 
@@ -555,7 +563,7 @@ public Agent()
    centerOfGravity   = new PVector();
    absoluteVelocity  = 0;
    vImage            = loadImage("red.png");
-   vImage.resize(45, 18);
+   vImage.resize((int)(4.5*SCALE),(int) (1.8*SCALE));
    vColor            = color(random(100, 255),random(100, 255),random(100, 255));
    imageMode(CENTER);
 

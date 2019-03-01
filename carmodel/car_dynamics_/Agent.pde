@@ -44,7 +44,7 @@ class Agent implements Runnable{
     float ebrake;
     void setThrottle(float val){
       if (val==1) {this.throttle = min(this.throttle + 0.1, 1);}
-      else if ( val==-1 && this.throttle >-1){this.throttle = max(this.throttle - 0.1, -1);}
+      else if ( val==-1){this.throttle = max(this.throttle - 0.1, -1);}
       else {this.throttle = 0;}
    
     }
@@ -56,7 +56,8 @@ class Agent implements Runnable{
     }
 
    float getAngVel(){
-     return velocity.mag() ;/// car.cartype.axleRear.tireLeft.radius;
+     //return sqrt(pow(this.Velocity.x, 2) + pow(this.Velocity.y, 2));
+     return velocity_wc.mag();/// car.cartype.axleRear.tireLeft.radius;
    }
    float getKilometersPerHour(){
      return velocity.mag() * 18.0 / 5.0;
@@ -87,8 +88,8 @@ class Agent implements Runnable{
   class ENGINE
   {  
     public ENGINE(){
-      gearRatios  = new float[]{5.8, 4.5, 3.74, 2.8, 1.6, 0.79, 4.2};
-      torqueCurve = new int[]{100, 280, 340, 420, 500, 350, 300, 100};
+      gearRatios  = new float[]{2.66, 1.78, 1.3, 1.0, 0.74, 0.5, 2.9};
+      torqueCurve = new int[]{100, 380, 440, 460, 480, 490, 400, 300};
       currentGear = 0;
     }
     float[] gearRatios;
@@ -115,7 +116,8 @@ class Agent implements Runnable{
       return car.getAngVel() * (60.0 / PI * 2) * (gearRatio() * effectiveGearRatio());
     }
     public float getTorque(float rpm){
-      if (rpm < 1000) {      
+      if (rpm < 1000) {  
+        rpm = 1000;
       return lerp (torqueCurve [0], torqueCurve [1], rpm / 1000f);
     } else if (rpm < 2000) {
       return lerp (torqueCurve [1], torqueCurve [2], (rpm - 1000) / 1000f);
@@ -136,11 +138,11 @@ class Agent implements Runnable{
     public void updateAutomaticTransmission(CAR car){
       float rpm = getRPM(car);
        lastRPM = rpm;
-      if(rpm > 6200){
+      if(rpm > 4500){
         if(getCurrentGear() < 5){
           setCurrentGear(getCurrentGear() + 1);
         }
-      } else if (rpm < 3000){
+      } else if (rpm < 2000){
         if (getCurrentGear() > 0){
           setCurrentGear(getCurrentGear() - 1);
         }
@@ -443,7 +445,7 @@ void weightTires(){
  float dragForceY = -RESISTANCE * velocity.y - AIRDRAG * velocity.y * abs(velocity.y);
 
  float totalForceX = dragForceX + tractionForceX;
-      // + sin(steerAngle) * car.cartype.axleFront.getFrictionForce() + car.cartype.axleRear.getFrictionForce();
+       //+ sin(steerAngle) * car.cartype.axleFront.getFrictionForce() + car.cartype.axleRear.getFrictionForce();
  float totalForceY = dragForceY + tractionForceY 
        + cos (steerAngle) * car.cartype.axleFront.getFrictionForce() + car.cartype.axleRear.getFrictionForce();
 
@@ -497,12 +499,16 @@ void weightTires(){
 
  // Simulation likes to calculate high angular velocity at very low speeds - adjust for this
  if (absoluteVelocity < 1 && abs (steerAngle) < 0.05) {
-   car.angularvelocity = 0;
+     car.angularvelocity = 0;
  } else if (car.getKilometersPerHour() < 0.75f) {
      car.angularvelocity = 0;
    }
 
  headingAngle += car.angularvelocity * DELTA_T;
+ if (headingAngle < -TWO_PI){
+   headingAngle+=TWO_PI;}
+ else if( headingAngle > TWO_PI) {
+   headingAngle -=TWO_PI;}
 
  car.cartype.axleRear.tireLeft.pose   = new PVector(-2*SCALE,0.9*SCALE,0);//.rotate(headingAngle).add(position_wc);
  car.cartype.axleRear.tireRight.pose  = new PVector(-2*SCALE,-0.9*SCALE,0);//.rotate(headingAngle).add(position_wc);
